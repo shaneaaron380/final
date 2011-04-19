@@ -10,6 +10,11 @@ endif
 
 OBJ_DIR := obj
 
+INPUTS := $(shell bin/make_test_inputs.py -d)
+
+# can't figure out how to execute an arbitrary shell command, so i gotta do this
+INPUTS_DUMMY := $(shell bin/make_test_inputs.py -D > test_inputs.D)
+
 
 ################################################################################
 # main application
@@ -26,11 +31,17 @@ obj/main.o: src/main.cu inc/matrix.h inc/mat_mult_from_doc.h | $(OBJ_DIR)
 $(OBJ_DIR):
 	mkdir $(OBJ_DIR)
 
-run: $(TARGET)
+run: $(TARGET) inputs/test_input_incremental.mat 
 	$(SHELL) -c "DYLD_LIBRARY_PATH=/usr/local/cuda/lib ./$(TARGET) \
-		obj/test_input_incremental.mat obj/test_input_incremental.mat 1.0 C \
+		inputs/test_input_incremental.mat \
+		inputs/test_input_incremental.mat 1.0 C \
 		obj/test_output_incremental.mat"
 
+run2: $(TARGET) inputs/test_input_100000000_ones.mat inputs/test_input_100000000_triangular.mat
+	$(SHELL) -c "DYLD_LIBRARY_PATH=/usr/local/cuda/lib ./$(TARGET) \
+		inputs/test_input_100000000_ones.mat  \
+		inputs/test_input_100000000_triangular.mat 1.0 C \
+		obj/test_output_incremental.mat"
 
 ################################################################################
 # libraries
@@ -49,12 +60,14 @@ obj/mat_mult_from_doc.o: lib/mat_mult_from_doc.cu inc/mat_mult_from_doc.h | $(OB
 .PHONY: clean inputs
 
 clean:
-	-rm -rf $(OBJ_DIR) $(mARGET) Session.vim
-
-inputs:
-	bin/make_test_inputs.py
+	-rm -rf $(OBJ_DIR) $(TARGET) Session.vim
 
 tags: src/* inc/* lib/*
 	[ -f tags ] && rm tags || true
 	ctags src/* inc/* lib/*
+
+-include test_inputs.D
+
+inputs: $(INPUTS)
+	@echo -n "" # dummy command just so make doesn't whine
 
