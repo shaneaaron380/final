@@ -1,6 +1,6 @@
 #! /usr/bin/env python
 
-import sys,os,array
+import sys,os,array,cProfile
 
 def Usage():
 	print 'USAGE: %s <input matrix A> <input matrix B>' % sys.argv[0]
@@ -45,20 +45,6 @@ class matrix(object):
 
 		return C
 
-
-#def mat_mult(A, B):
-#    C = matrix()
-#    C.m.extend(( -1.0 for i in xrange(A.height * B.width) ))
-#    C.width, C.height = B.width, A.height
-
-#    for r in xrange(A.height):
-#        for c in xrange(B.width):
-#            my_sum = 0
-#            for i in xrange(A.width):
-#                my_sum += A[r * A.width + i] * B[i * B.width + c]
-#            C[r * C.width + c] = my_sum
-
-#    return C
 
 def main():
 	if len(sys.argv) != 3 or sys.argv[1] == '-h' or sys.argv[1] == '--help':
