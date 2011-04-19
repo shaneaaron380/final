@@ -41,7 +41,7 @@ run2: $(TARGET) inputs/test_input_100000000_ones.mat inputs/test_input_100000000
 	$(SHELL) -c "DYLD_LIBRARY_PATH=/usr/local/cuda/lib ./$(TARGET) \
 		inputs/test_input_100000000_ones.mat  \
 		inputs/test_input_100000000_triangular.mat 1.0 C \
-		obj/test_output_incremental.mat"
+		obj/test_output_100000000.mat"
 
 ################################################################################
 # libraries
