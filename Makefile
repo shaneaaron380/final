@@ -100,4 +100,3 @@ clean:
 tags: src/* inc/* lib/*
 	[ -f tags ] && rm tags || true
 	ctags src/* inc/* lib/*
-
