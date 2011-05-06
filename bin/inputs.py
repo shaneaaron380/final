@@ -123,6 +123,33 @@ def make_test_input_100000000_ones():
 
 	f.close()
 
+def make_test_cublas_A():
+	f = open(this_func_input_name(), 'w')
+
+	f.write('5 5')
+	f.write("""
+-1.0  -4.0  -2.0   2.0   3.0
+ 0.0  -2.0   2.0   2.0   2.0
+ 0.0   0.0  -3.0  -1.0   4.0
+ 0.0   0.0   0.0   1.0   0.0
+ 0.0   0.0   0.0   0.0  -2.0
+""")
+	f.close()
+
+def make_test_cublas_B():
+	f = open(this_func_input_name(), 'w')
+
+	f.write('3 5')
+	f.write("""
+  6.0  10.0   -2.0
+-16.0  -1.0    6.0
+ -2.0   1.0   -4.0
+ 14.0   0.0  -14.0
+ -1.0   2.0    1.0
+""")
+	f.close()
+
+
 def Usage(ret_val = 0):
 	sys.stderr.write("""
 USAGE: %s [options]
