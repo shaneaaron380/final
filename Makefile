@@ -96,10 +96,10 @@ obj/my_cublas.o: test/my_cublas/main.cu | $(OBJ_DIR)
 
 sequential: bin/my_seq
 	$(SHELL) -c "DYLD_LIBRARY_PATH=/usr/local/cuda/lib bin/my_seq \
-		inputs/test_input_10_tri.txt \
-		inputs/test_input_10_threes.txt \
+		inputs/test_input_1024_tri.txt \
+		inputs/test_input_1024_ones.txt \
 		1.0 S \
-		obj/test_input_10_tri.txt.seq.out"
+		obj/test_input_1024_tri.txt.seq.out"
 
 bin/my_seq: obj/my_seq.o obj/mat_mult_seq.o obj/matrix.o | $(OBJ_DIR)
 	$(NVCC) $(FLAGS) $(LIBS) -o $@ obj/my_seq.o obj/mat_mult_seq.o obj/matrix.o

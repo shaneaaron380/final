@@ -16,10 +16,10 @@ void MatMultSeq(Matrix *A, Matrix *B, Matrix *X, float alpha) {
   for (i = 1; i < n; i++) {
     for (j = 0; j < n; j++) {
       S = alpha*B->els[i*B->width+j];
-      printf("i=%d,j=%d, S=%f\n", i, j, S);
+      //printf("i=%d,j=%d, S=%f\n", i, j, S);
       for (k = 0; k < i; k++) {
         S -= A->els[i*A->width+k] * X->els[k*X->width+j];
-        printf("k=%d, S=%f\n", k, S);
+        //printf("k=%d, S=%f\n", k, S);
       }
       X->els[i*X->width+j] = S; 
     }
