@@ -69,6 +69,8 @@ obj/mat_mult_from_doc.o: lib/mat_mult_from_doc.cu inc/mat_mult_from_doc.h inc/ma
 obj/mat_mult_cublas.o: lib/mat_mult_cublas.cu inc/mat_mult_cublas.h inc/matrix.h | $(OBJ_DIR)
 	$(NVCC) $(FLAGS) $(LIBS) -c -o $@ $<
 
+obj/mat_mult_seq.o: lib/mat_mult_seq.cu inc/mat_mult_seq.h inc/matrix.h | $(OBJ_DIR)
+	$(NVCC) $(FLAGS) $(LIBS) -c -o $@ $<
 
 ################################################################################
 # testing cublas
@@ -89,13 +91,31 @@ obj/my_cublas.o: test/my_cublas/main.cu | $(OBJ_DIR)
 
 
 ################################################################################
+# testing sequential 
+################################################################################
+
+sequential: bin/my_seq
+	$(SHELL) -c "DYLD_LIBRARY_PATH=/usr/local/cuda/lib bin/my_seq \
+		inputs/test_input_10_tri.txt \
+		inputs/test_input_10_threes.txt \
+		1.0 S \
+		obj/test_input_10_tri.txt.seq.out"
+
+bin/my_seq: obj/my_seq.o obj/mat_mult_seq.o obj/matrix.o | $(OBJ_DIR)
+	$(NVCC) $(FLAGS) $(LIBS) -o $@ obj/my_seq.o obj/mat_mult_seq.o obj/matrix.o
+
+obj/my_seq.o: test/my_seq/main.cu | $(OBJ_DIR)
+	$(NVCC) $(FLAGS) $(LIBS) -c -o $@ $<
+
+
+################################################################################
 # housekeeping
 ################################################################################
 
 .PHONY: clean inputs
 
 clean:
-	-rm -rf $(OBJ_DIR) $(TARGET) Session.vim bin/my_cublas
+	-rm -rf $(OBJ_DIR) $(TARGET) Session.vim bin/my_cublas bin/my_seq
 
 tags: src/* inc/* lib/*
 	[ -f tags ] && rm tags || true
