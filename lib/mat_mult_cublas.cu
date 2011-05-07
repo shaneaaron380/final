@@ -37,8 +37,14 @@ int MatMultCublas(const Matrix A, Matrix B)
 		RET_ERROR("failed to allocate space for B");
 	}
 
-	cudaMemcpy(d_A.els, A.els, A.width*A.height*sizeof(float), cudaMemcpyHostToDevice);
-	cudaMemcpy(d_B.els, B.els, B.width*B.height*sizeof(float), cudaMemcpyHostToDevice);
+	r = cudaMemcpy(d_A.els, A.els, A.width*A.height*sizeof(float),
+			cudaMemcpyHostToDevice);
+	if (r != cudaSuccess)
+		RET_ERROR("could not copy data to d_A");
+	r = cudaMemcpy(d_B.els, B.els, B.width*B.height*sizeof(float),
+			cudaMemcpyHostToDevice);
+	if (r != cudaSuccess)
+		RET_ERROR("could not copy data to d_B");
 
 	cublasStrsm('l',		/* side: a is on the left side of B (and this X) */
 				'l',		/* uplo: lower triangular */
@@ -53,7 +59,10 @@ int MatMultCublas(const Matrix A, Matrix B)
 				d_B.els,	/* b: 'B' matrix */
 				B.height	/* ldb -- ??? */);
 
-	cudaMemcpy(B.els, d_B.els, B.height*B.width*sizeof(float), cudaMemcpyDeviceToHost);
+	r = cudaMemcpy(B.els, d_B.els, B.height*B.width*sizeof(float),
+			cudaMemcpyDeviceToHost);
+	if (r != cudaSuccess)
+		RET_ERROR("could not copy data from d_B");
 
 	int e = cublasGetError();
 	if (e == CUBLAS_STATUS_NOT_INITIALIZED) {
