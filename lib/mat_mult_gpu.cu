@@ -9,9 +9,8 @@ __global__ void MatMultKernel(const Matrix A, const Matrix B, Matrix C, int n)
   //int j = blockIdx.y * blockDim.y + threadIdx.y;
   float S;
  
-  cuPrintf("%d,%d : %d,%d : %d,%d\n", blockIdx.x, blockIdx.y, blockDim.x, blockDim.y, threadIdx.x, threadIdx.y);
-
   if (j < n) {
+    //cuPrintf("%d,%d : %d,%d : %d,%d\n", blockIdx.x, blockIdx.y, blockDim.x, blockDim.y, threadIdx.x, threadIdx.y);
     for (int i = 0; i < n; i++) {
       S = B.els[i*n+j]; //S = B[i][j];
       //cuPrintf("i=%d,j=%d, S=%f\n", i, j, S);
