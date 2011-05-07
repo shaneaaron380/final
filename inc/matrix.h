@@ -11,7 +11,7 @@ typedef struct {
 } Matrix;
 
 #define MATRIX_FILE_TRANSPOSE 1
-#define MATRIX_FILE_NO_TRANSPOSE 1
+#define MATRIX_FILE_NO_TRANSPOSE 0
 
 int MatrixFromFile(char const* const filename, Matrix *m, int trans);
 int MatrixToFile(char const* const filename, Matrix const* const m, int trans);
