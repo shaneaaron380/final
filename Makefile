@@ -91,6 +91,12 @@ cublas: bin/my_cublas $(INPUTS)
 		1.0 C \
 		obj/test_cublas_A_unit_low.txt.out
 
+cublas2: bin/my_cublas $(INPUTS)
+	bin/my_cublas \
+		inputs/test_input_1024_tri.txt \
+		inputs/test_input_1024_ones.txt 1.0 G \
+		obj/test_input_1024_tri.txt.cublas.out
+
 bin/my_cublas: obj/my_cublas.o obj/mat_mult_cublas.o obj/matrix.o | $(OBJ_DIR)
 	$(NVCC) $(FLAGS) $(LIBS) -o $@ obj/my_cublas.o obj/mat_mult_cublas.o obj/matrix.o
 
