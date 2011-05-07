@@ -89,6 +89,26 @@ def make_test_input_1024_tri():
 
 	f.close()
 
+def make_test_input_90000_tri():
+	f = open(this_func_input_name(), 'w')
+
+	l = 300 
+
+	f.write('%d %d\n' % (l, l))
+
+	for i in xrange(l):
+		for j in xrange(i):
+			f.write('%2.0f ' % float(j))
+
+		f.write('%2.0f ' % 1.000)
+
+		for j in xrange(l - 1 - i):
+			f.write('%2.0f ' % 0.000)
+
+		f.write('\n')
+
+	f.close()
+
 def make_test_input_1024_ones():
 	f = open(this_func_input_name(), 'w')
 
@@ -104,6 +124,19 @@ def make_test_input_1024_ones():
 
 #def make_test_input_1048576_tri():
 #    f = open
+
+def make_test_input_90000_ones():
+	f = open(this_func_input_name(), 'w')
+
+	l = 300
+
+	f.write('%d %d\n' % (l, l))
+
+	for i in xrange(l):
+		[ f.write('%2.0f ' % 1.0) for j in xrange(l) ]
+		f.write('\n')
+
+	f.close()
 
 def make_test_input_100000000_tri():
 	f = open(this_func_input_name(), 'w')

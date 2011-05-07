@@ -9,9 +9,8 @@ __global__ void MatMultKernel(const Matrix A, const Matrix B, Matrix C, int n)
   //int j = blockIdx.y * blockDim.y + threadIdx.y;
   float S;
  
-  //cuPrintf("%d,%d : %d,%d : %d,%d\n", blockIdx.x, blockIdx.y, blockDim.x, blockDim.y, threadIdx.x, threadIdx.y);
-
   if (j < n) {
+    //cuPrintf("%d,%d : %d,%d : %d,%d\n", blockIdx.x, blockIdx.y, blockDim.x, blockDim.y, threadIdx.x, threadIdx.y);
     for (int i = 0; i < n; i++) {
       S = B.els[i*n+j]; //S = B[i][j];
       //cuPrintf("i=%d,j=%d, S=%f\n", i, j, S);
@@ -40,6 +39,7 @@ void MatMultGPU(const Matrix A, const Matrix B, Matrix C)
   //  printf("There is no device supporting CUDA.\n"); exit (0); 
   //}
   int n = A.width;
+	cudaError_t cudaMallocReturnStatus;
 
   cudaPrintfInit();
 
@@ -47,18 +47,28 @@ void MatMultGPU(const Matrix A, const Matrix B, Matrix C)
 	d_A.height = A.height;
 	size_t size = A.width * A.height * sizeof(float);
 	cudaMalloc((void**)&d_A.els, size);
+	cudaMallocReturnStatus = cudaMalloc((void**)&d_A.els, size);
+	if (cudaMallocReturnStatus == cudaErrorMemoryAllocation) {
+		printf("Couldn't allocate A on CPU, exiting\n"); exit(0);
+	}
 	cudaMemcpy(d_A.els, A.els, size, cudaMemcpyHostToDevice);
 
 	d_B.width = d_B.stride = B.width;
 	d_B.height = B.height;
 	size = B.width * B.height * sizeof(float);
 	cudaMalloc((void**)&d_B.els, size);
+	if (cudaMallocReturnStatus == cudaErrorMemoryAllocation) {
+		printf("Couldn't allocate B on CPU, exiting\n"); exit(0);
+	}
 	cudaMemcpy(d_B.els, B.els, size, cudaMemcpyHostToDevice);
 
 	d_C.width = d_C.stride = C.width;
 	d_C.height = C.height;
 	size = C.width * C.height * sizeof(float);
 	cudaMalloc((void**)&d_C.els, size);
+	if (cudaMallocReturnStatus == cudaErrorMemoryAllocation) {
+		printf("Couldn't allocate C on CPU, exiting\n"); exit(0);
+	}
 
 	//dim3 dimBlock(BLOCK_SIZE, BLOCK_SIZE);
 	//dim3 dimBlock(A.width, A.width);
