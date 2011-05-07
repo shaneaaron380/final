@@ -34,8 +34,11 @@ int MatrixToFile(char const* const filename, Matrix const* const m, int trans)
 {
 	FILE *f;
 
-	if (! (f = fopen(filename, "w")))
-		RET_ERROR("could not open %s for writing", filename);
+	if (strncmp(filename, "-", 2) == 0)
+		f = stdout;
+	else
+		if (! (f = fopen(filename, "w")))
+			RET_ERROR("could not open %s for writing", filename);
 
 	fprintf(f, "%d %d\n", m->width, m->height);
 
