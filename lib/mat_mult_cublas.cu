@@ -18,8 +18,12 @@ int MatMultCublas(const Matrix A, Matrix B)
 
 	Matrix d_A, d_B;
 
-	cublasAlloc(A.width*A.height, sizeof(float), (void**) &d_A.els);
-	cublasAlloc(B.width*B.height, sizeof(float), (void**) &d_B.els);
+	if (cublasAlloc(A.width*A.height, sizeof(A.els[0]), (void**) &d_A.els) !=
+			CUBLAS_STATUS_SUCCESS)
+		RET_ERROR("failed to allocate space for A");
+	if (cublasAlloc(B.width*B.height, sizeof(B.els[0]), (void**) &d_B.els) !=
+			CUBLAS_STATUS_SUCCESS)
+		RET_ERROR("failed to allocate space for B");
 
 	cudaMemcpy(d_A.els, A.els, A.width*A.height*sizeof(float), cudaMemcpyHostToDevice);
 	cudaMemcpy(d_B.els, B.els, B.width*B.height*sizeof(float), cudaMemcpyHostToDevice);

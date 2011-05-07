@@ -86,10 +86,41 @@ obj/mat_mult_gpu.o: lib/mat_mult_gpu.cu inc/mat_mult_gpu.h inc/matrix.h | $(OBJ_
 
 cublas: bin/my_cublas $(INPUTS)
 	bin/my_cublas \
+		inputs/test_input_1024_tri.txt \
+		inputs/test_input_1024_ones.txt \
+		1.0 C \
+		obj/test_input_1024_tri.txt.cublas.out
+
+cublassmall: bin/my_cublas $(INPUTS)
+	bin/my_cublas \
 		inputs/test_cublas_A_unit_low.txt \
 		inputs/test_cublas_B.txt \
 		1.0 C \
 		obj/test_cublas_A_unit_low.txt.out
+
+cublastest: cublassmall cublas
+	bin/golden_mat_mult.py \
+		inputs/test_cublas_A_unit_low.txt \
+		inputs/test_cublas_B.txt > \
+		obj/test_cublas_A_unit_low.txt.golden
+	bin/diff_matrices.py \
+		obj/test_cublas_A_unit_low.txt.out \
+		obj/test_cublas_A_unit_low.txt.golden
+	bin/golden_mat_mult.py \
+		inputs/test_input_1024_tri.txt \
+		inputs/test_input_1024_ones.txt > \
+		obj/test_input_1024_tri.txt.golden
+	bin/diff_matrices.py \
+		obj/test_input_1024_tri.txt.cublas.out \
+		obj/test_input_1024_tri.txt.golden
+
+
+cublaslarge: bin/my_cublas $(INPUTS)
+	bin/my_cublas \
+		inputs/test_input_100000000_tri.txt \
+		inputs/test_input_100000000_ones.txt \
+		1.0 C \
+		obj/test_input_100000000_tri.txt.cublas.out
 
 bin/my_cublas: obj/my_cublas.o obj/mat_mult_cublas.o obj/matrix.o | $(OBJ_DIR)
 	$(NVCC) $(FLAGS) $(LIBS) -o $@ obj/my_cublas.o obj/mat_mult_cublas.o obj/matrix.o
@@ -128,7 +159,7 @@ obj/my_seq.o: test/my_seq/main.cu | $(OBJ_DIR)
 # housekeeping
 ################################################################################
 
-.PHONY: clean inputs
+.PHONY: clean inputs cublas cublassmall
 
 clean:
 	-rm -rf $(OBJ_DIR) $(TARGET) Session.vim bin/my_cublas bin/my_seq
