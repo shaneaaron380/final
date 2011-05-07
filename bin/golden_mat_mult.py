@@ -60,7 +60,7 @@ def main():
 
 	C = A.I * B
 
-	print '%d %d' % C.shape
+	print '%d %d' % (C.shape[1], C.shape[0])
 
 	for i in xrange(C.shape[0]):
 		for j in xrange(C.shape[1]):
