@@ -61,6 +61,12 @@ run2: $(TARGET) $(INPUTS)
 		inputs/test_input_100000000_ones.txt 1.0 C \
 		obj/test_input_100000000_tri.txt.out
 
+run3: $(TARGET) $(INPUTS)
+	./$(TARGET) \
+		inputs/test_input_90000_tri.txt \
+		inputs/test_input_90000_ones.txt 1.0 C \
+		obj/test_input_90000_tri.txt.out
+
 ################################################################################
 # libraries
 ################################################################################
