@@ -134,6 +134,19 @@ def make_test_cublas_A():
 """)
 	f.close()
 
+def make_test_cublas_A_unit_low():
+	f = open(this_func_input_name(), 'w')
+
+	f.write('5 5')
+	f.write("""
+ 1.0   0.0   0.0   0.0   0.0
+-1.0   1.0   0.0   0.0   0.0
+ 2.0   4.0   1.0   0.0   0.0
+ 2.0  -1.0   0.0   1.0   0.0
+ 1.0   3.0   2.0  -2.0   1.0
+""")
+	f.close()
+
 def make_test_cublas_B():
 	f = open(this_func_input_name(), 'w')
 
