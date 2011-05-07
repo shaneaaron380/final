@@ -27,7 +27,7 @@ int MatMultCublas(const Matrix A, Matrix B)
 	cublasStrsm('l',		/* side: a is on the left side of B (and this X) */
 				'l',		/* uplo: lower triangular */
 				'n',		/* transa: don't transpose */
-				'y',		/* diag: unit diagonal */
+				'u',		/* diag: unit diagonal */
 				B.height,	/* m: number of rows in B, and since 'l', it's also
 							   the order of A */
 				B.width,	/* n: number of columns in B */
