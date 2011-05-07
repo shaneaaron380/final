@@ -13,15 +13,20 @@
 
 int MatMultCublas(const Matrix A, Matrix B)
 {
-	cublasStatus status = CUBLAS_STATUS_SUCCESS;
-
 	/*float A[N][N] =   { { 3.0, -1.0 },*/
 	/*                    { 0.0, -2.0 } },*/
 
 	/*      B[N][N] =   { { 1.0, 1.0 },*/
 	/*                    { 1.0, 1.0 } };*/
 
+	if (cublasInit() != CUBLAS_STATUS_SUCCESS)
+		RET_ERROR("cublasInit failed");
+
+	Matrix d_A, d_B;
+
 #if 0
+	printf("using static, NON-transposed matrices\n");
+
 	float As[7][5] =  { { 3.0, -1.0,  2.0,  2.0,  1.0 },
 						{ 0.0, -2.0,  4.0, -1.0,  3.0 },
 						{ 0.0,  0.0, -3.0,  0.0,  2.0 },
@@ -36,7 +41,9 @@ int MatMultCublas(const Matrix A, Matrix B)
 						{  14.0,  0.0, -14.0 },
 						{  -1.0,  2.0,   1.0 },
 						{   0.0,  0.0,   0.0 } };
-#else
+#elif 0
+	printf("using static, transposed matrices\n");
+
 	float As[5][7] =  { {  3.0,  0.0,  0.0,  0.0,  0.0,  0.0,  0.0 },
 						{ -1.0, -2.0,  0.0,  0.0,  0.0,  0.0,  0.0 },
 						{  2.0,  4.0, -3.0,  0.0,  0.0,  0.0,  0.0 },
@@ -46,19 +53,50 @@ int MatMultCublas(const Matrix A, Matrix B)
 	float Bs[3][6] =  { {   6.0, -16.0,  -2.0,  14.0,  -1.0,   0.0 },
 						{  10.0,  -1.0,   1.0,   0.0,   2.0,   0.0 },
 						{  -2.0,   6.0,  -4.0, -14.0,   1.0,   0.0 } };
-#endif
-
-	if (cublasInit() != CUBLAS_STATUS_SUCCESS)
-		RET_ERROR("cublasInit failed");
-
-	Matrix d_A, d_B;
 
 	cublasAlloc(5*7, sizeof(float), (void**) &d_A.els);
 	cublasAlloc(3*6, sizeof(float), (void**) &d_B.els);
 
 	cudaMemcpy(d_A.els, As, 5*7*sizeof(float), cudaMemcpyHostToDevice);
-
 	cudaMemcpy(d_B.els, Bs, 6*3*sizeof(float), cudaMemcpyHostToDevice);
+
+#else
+	printf("using static, transposed matrices without padding\n");
+
+	float As[5][5] =  { {  3.0,  0.0,  0.0,  0.0,  0.0},
+						{ -1.0, -2.0,  0.0,  0.0,  0.0},
+						{  2.0,  4.0, -3.0,  0.0,  0.0},
+						{  2.0, -1.0,  0.0,  4.0,  0.0},
+						{  1.0,  3.0,  2.0, -2.0,  1.0} };
+
+	float Bs[3][5] =  { {   6.0, -16.0,  -2.0,  14.0,  -1.0},
+						{  10.0,  -1.0,   1.0,   0.0,   2.0},
+						{  -2.0,   6.0,  -4.0, -14.0,   1.0} };
+
+	cublasAlloc(5*5, sizeof(float), (void**) &d_A.els);
+	cublasAlloc(3*5, sizeof(float), (void**) &d_B.els);
+
+	/*fprintf(stderr, "------------------------------ before mult:\n");*/
+	/*for (int i = 0; i < 5; ++i) {*/
+	/*    for (int j = 0; j < 3; ++j) {*/
+	/*        fprintf(stderr, "%5.1lf ", ((float *) Bs)[5 * j + i]);*/
+	/*    }*/
+	/*    fprintf(stderr, "\n");*/
+	/*}*/
+	/*fprintf(stderr, "------------------------------ B matrix\n");*/
+	/*for (int i = 0; i < B.height; ++i) {*/
+	/*    for (int j = 0; j < B.width; ++j) {*/
+	/*        fprintf(stderr, "%5.1lf ", ((float *) B.els)[B.height * j + i]);*/
+	/*    }*/
+	/*    fprintf(stderr, "\n");*/
+	/*}*/
+	/*fprintf(stderr, "------------------------------\n");*/
+
+	cudaMemcpy(d_A.els, As, 5*5*sizeof(float), cudaMemcpyHostToDevice);
+	cudaMemcpy(d_B.els, Bs, 5*3*sizeof(float), cudaMemcpyHostToDevice);
+	/*cudaMemcpy(d_B.els, B.els, B.width*B.height*sizeof(float), cudaMemcpyHostToDevice);*/
+
+#endif
 
 	cublasStrsm('l',		/* side: a is on the left side of B (and this X) */
 				'u',		/* uplo: upper triangular */
@@ -69,23 +107,15 @@ int MatMultCublas(const Matrix A, Matrix B)
 				3,			/* n: number of columns in B */
 				1.0,		/* alpha: alpha scalar */
 				d_A.els,	/* a: 'A' matrix */
-				7,			/* lda -- ??? */
+				5,			/* lda -- ??? */
 				d_B.els,	/* b: 'B' matrix */
-				6			/* ldb -- ??? */);
+				5			/* ldb -- ??? */);
 
-	cudaMemcpy(Bs, d_B.els, 6*3*sizeof(float), cudaMemcpyDeviceToHost);
+	cudaMemcpy(Bs, d_B.els, 5*3*sizeof(float), cudaMemcpyDeviceToHost);
 
-	/*for (int i = 0; i < 3; ++i) {*/
-	/*    for (int j = 0; j < 6; ++j) {*/
-	/*        fprintf(stderr, "%5.1f ", Bs[i][j]);*/
-	/*    }*/
-	/*    fprintf(stderr, "\n");*/
-	/*}*/
-	/*fprintf(stderr, "\n");*/
-
-	for (int i = 0; i < 6; ++i) {
+	for (int i = 0; i < 5; ++i) {
 		for (int j = 0; j < 3; ++j) {
-			fprintf(stderr, "%5.1lf ", ((float *) Bs)[6 * j + i]);
+			fprintf(stderr, "%5.1lf ", ((float *) Bs)[5 * j + i]);
 		}
 		fprintf(stderr, "\n");
 	}
