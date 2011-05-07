@@ -6,7 +6,7 @@ void Usage(int retVal, char *argv0)
 {
 	fprintf(retVal == 0? stdout : stderr,
 			"USAGE: %s <matrix A input file> <matrix B input file> "
-			"<output matrix file> <alpha> <S,G,C>\n", argv0);
+			"[<output matrix file>] <alpha> <S,G,C>\n", argv0);
 
 	exit(retVal);
 }
@@ -14,8 +14,8 @@ void Usage(int retVal, char *argv0)
 int GetInputs(int argc, char *argv[], Matrix *a, Matrix *b, float *alpha, char
 		*which)
 {
-	if (argc != 6)
-		RET_ERROR("must have 5 cmd line args");
+	if (argc < 5)
+		RET_ERROR("must have 4 or 5 cmd line args");
 
 	if (MatrixFromFile(argv[1], a, MATRIX_FILE_TRANSPOSE) != SUCCESS)
 		RET_ERROR("could not read matrix A");
@@ -41,8 +41,13 @@ int main(int argc, char *argv[])
 
 	MatMultCublas(A, B);
 
-	if (MatrixToFile(argv[5], &B, MATRIX_FILE_TRANSPOSE) != SUCCESS)
-		RET_ERROR("could not write result matrix to %s", argv[5]);
+	if (argc >= 6) {
+		if (MatrixToFile(argv[5], &B, MATRIX_FILE_TRANSPOSE) != SUCCESS)
+			RET_ERROR("could not write result matrix to %s", argv[5]);
+	} else {
+		if (MatrixToFile("-", &B, MATRIX_FILE_TRANSPOSE) != SUCCESS)
+			RET_ERROR("could not write result matrix to %s", argv[5]);
+	}
 
 	return 0;
 }
