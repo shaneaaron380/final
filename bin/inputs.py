@@ -66,10 +66,9 @@ def make_test_input_1024_tri():
 		for j in xrange(i):
 			f.write('%2.0f ' % float(j))
 
-		if i < l:
-			f.write('%2.0f ' % 1.000)
+		f.write('%2.0f ' % 1.000)
 
-		for j in xrange(l - i):
+		for j in xrange(l - 1 - i):
 			f.write('%2.0f ' % 0.000)
 
 		f.write('\n')
@@ -100,10 +99,9 @@ def make_test_input_100000000_tri():
 		for j in xrange(i):
 			f.write('%2.0f ' % float(j))
 
-		if i < l:
-			f.write('%2.0f ' % 1.000)
+		f.write('%2.0f ' % 1.000)
 
-		for j in xrange(l - i):
+		for j in xrange(l - 1 - i):
 			f.write('%2.0f ' % 0.000)
 
 		f.write('\n')
