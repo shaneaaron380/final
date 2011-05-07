@@ -31,6 +31,20 @@ def this_func_input_name():
 	"""
 	return input_name_from_func_name(inspect.stack()[1][3])
 
+def _make_tri_input(f, size, values_gen):
+	f.write('%d %d\n' % (size, size))
+
+	for i in xrange(size):
+		for j in xrange(i):
+			f.write('%2.0f ' % values_gen.next())
+
+		f.write('%2.0f ' % 1.000)
+
+		for j in xrange(size - 1 - i):
+			f.write('%2.0f ' % 0.000)
+
+		f.write('\n')
+
 def get_functions():
 	"""
 	this just returns a list of all the functions that start with "make_"
@@ -87,6 +101,9 @@ def make_test_input_1024_ones():
 		f.write('\n')
 
 	f.close()
+
+#def make_test_input_1048576_tri():
+#    f = open
 
 def make_test_input_100000000_tri():
 	f = open(this_func_input_name(), 'w')
