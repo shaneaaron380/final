@@ -131,5 +131,5 @@ CTAGS_DIRS = $(shell \
 			 done)
 tags: src/* lib/* $(CTAGS_DIRS)
 	[ -f tags ] && rm tags || true
-	ctags src/* lib/* $(CTAGS_DIRS)
+	ctags --langmap=C:.c.cu src/* lib/* $(CTAGS_DIRS)
 
