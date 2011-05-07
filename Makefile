@@ -7,13 +7,13 @@ SHELL := $(shell which bash)
 ifneq ($(TACC_CUDA_INC),)
 	override FLAGS += -I$(TACC_CUDA_INC)
 else
-	override FLAGS += -I/usr/local/cuda/inc
+	override FLAGS += -I/usr/local/cuda/include
 endif
 
 ifneq ($(TACC_CUDA_LIB),)
-	override FLAGS += -L$(TACC_CUDA_LIB) -lcublas
+	override LIBS += -L$(TACC_CUDA_LIB) -lcublas
 else
-	override FLAGS += -L/usr/local/cuda/lib -lcublas
+	override LIBS += -L/usr/local/cuda/lib -lcublas
 endif
 
 ifeq ($(DEBUG), 1)
@@ -81,10 +81,10 @@ obj/mat_mult_gpu.o: lib/mat_mult_gpu.cu inc/mat_mult_gpu.h inc/matrix.h | $(OBJ_
 
 cublas: bin/my_cublas
 	$(SHELL) -c "DYLD_LIBRARY_PATH=/usr/local/cuda/lib bin/my_cublas \
-		inputs/test_input_100000000_tri.txt \
-		inputs/test_input_100000000_ones.txt \
+		inputs/test_cublas_A.txt \
+		inputs/test_cublas_B.txt \
 		1.0 C \
-		obj/test_input_100000000_tri.txt.cuda.out"
+		obj/test_cublas_A.txt.out"
 
 bin/my_cublas: obj/my_cublas.o obj/mat_mult_cublas.o obj/matrix.o | $(OBJ_DIR)
 	$(NVCC) $(FLAGS) $(LIBS) -o $@ obj/my_cublas.o obj/mat_mult_cublas.o obj/matrix.o
@@ -125,6 +125,11 @@ obj/my_seq.o: test/my_seq/main.cu | $(OBJ_DIR)
 clean:
 	-rm -rf $(OBJ_DIR) $(TARGET) Session.vim bin/my_cublas bin/my_seq
 
-tags: src/* inc/* lib/*
+CTAGS_DIRS = $(shell \
+			 for d in `echo $(FLAGS) | sed 's/-I//g'`; do \
+				 [ -d $$d ] && echo "$$d/*"; \
+			 done)
+tags: src/* lib/* $(CTAGS_DIRS)
 	[ -f tags ] && rm tags || true
-	ctags src/* inc/* lib/*
+	ctags src/* lib/* $(CTAGS_DIRS)
+
