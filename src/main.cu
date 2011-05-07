@@ -20,10 +20,10 @@ int GetInputs(int argc, char *argv[], Matrix *a, Matrix *b, float *alpha, char
 	if (argc != 6)
 		RET_ERROR("must have 5 cmd line args");
 
-	if (MatrixFromFile(argv[1], a) != SUCCESS)
+	if (MatrixFromFile(argv[1], a, MATRIX_FILE_NO_TRANSPOSE) != SUCCESS)
 		RET_ERROR("could not read matrix A");
 
-	if (MatrixFromFile(argv[2], b) != SUCCESS)
+	if (MatrixFromFile(argv[2], b, MATRIX_FILE_NO_TRANSPOSE) != SUCCESS)
 		RET_ERROR("could not read matrix B");
 
 	*alpha = strtof(argv[3], (char**)NULL);
@@ -50,7 +50,7 @@ int main(int argc, char *argv[])
 
 	MatMultGPU(A, B, C);
 
-	if (MatrixToFile(argv[5], &C) != SUCCESS)
+	if (MatrixToFile(argv[5], &C, MATRIX_FILE_NO_TRANSPOSE) != SUCCESS)
 		RET_ERROR("could not write result matrix to %s", argv[5]);
 
 	return 0;

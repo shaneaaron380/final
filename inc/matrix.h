@@ -10,9 +10,10 @@ typedef struct {
 	float *els;
 } Matrix;
 
-int MatrixFromFile(char const* const filename, Matrix *m);
-int MatrixToFile(char const* const filename, Matrix const* const m);
-int MatrixFromFile_T(char const* const filename, Matrix *m);
-int MatrixToFile_T(char const* const filename, Matrix const* const m);
+#define MATRIX_FILE_TRANSPOSE 1
+#define MATRIX_FILE_NO_TRANSPOSE 1
+
+int MatrixFromFile(char const* const filename, Matrix *m, int trans);
+int MatrixToFile(char const* const filename, Matrix const* const m, int trans);
 
 #endif
