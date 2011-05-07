@@ -39,7 +39,8 @@ int main(int argc, char *argv[])
 	if (GetInputs(argc, argv, &A, &B, &alpha, &which) != SUCCESS)
 		Usage(1, argv[0]);
 
-	MatMultCublas(A, B);
+	if (MatMultCublas(A, B) != SUCCESS)
+		RET_ERROR("MatMultCublas failed")
 
 	if (argc >= 6) {
 		if (MatrixToFile(argv[5], &B, MATRIX_FILE_TRANSPOSE) != SUCCESS)

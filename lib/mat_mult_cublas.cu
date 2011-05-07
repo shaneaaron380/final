@@ -13,17 +13,29 @@
 
 int MatMultCublas(const Matrix A, Matrix B)
 {
+	int r;
 	if (cublasInit() != CUBLAS_STATUS_SUCCESS)
 		RET_ERROR("cublasInit failed");
 
 	Matrix d_A, d_B;
 
-	if (cublasAlloc(A.width*A.height, sizeof(A.els[0]), (void**) &d_A.els) !=
-			CUBLAS_STATUS_SUCCESS)
+	r = cublasAlloc(A.width*A.height, sizeof(A.els[0]), (void**) &d_A.els);
+	if (r == CUBLAS_STATUS_INVALID_VALUE) {
+		RET_ERROR("failed to allocate space for A b/c of an invalid value");
+	} else if (r == CUBLAS_STATUS_ALLOC_FAILED) {
+		RET_ERROR("failed to allocate space for A b/c of alloc failed");
+	} else if (r != CUBLAS_STATUS_SUCCESS) {
 		RET_ERROR("failed to allocate space for A");
-	if (cublasAlloc(B.width*B.height, sizeof(B.els[0]), (void**) &d_B.els) !=
-			CUBLAS_STATUS_SUCCESS)
+	}
+
+	r = cublasAlloc(B.width*B.height, sizeof(B.els[0]), (void**) &d_B.els);
+	if (r == CUBLAS_STATUS_INVALID_VALUE) {
+		RET_ERROR("failed to allocate space for B b/c of an invalid value");
+	} else if (r == CUBLAS_STATUS_ALLOC_FAILED) {
+		RET_ERROR("failed to allocate space for B b/c of alloc failed");
+	} else if (r != CUBLAS_STATUS_SUCCESS) {
 		RET_ERROR("failed to allocate space for B");
+	}
 
 	cudaMemcpy(d_A.els, A.els, A.width*A.height*sizeof(float), cudaMemcpyHostToDevice);
 	cudaMemcpy(d_B.els, B.els, B.width*B.height*sizeof(float), cudaMemcpyHostToDevice);
@@ -45,12 +57,12 @@ int MatMultCublas(const Matrix A, Matrix B)
 
 	int e = cublasGetError();
 	if (e == CUBLAS_STATUS_NOT_INITIALIZED) {
-		fprintf(stderr, "CUBLAS_STATUS_NOT_INITIALIZED\n");
-	} else if (e == CUBLAS_STATUS_INVALID_VALUE) { 
-		fprintf(stderr, "CUBLAS_STATUS_INVALID_VALUE\n");
+		RET_ERROR("CUBLAS_STATUS_NOT_INITIALIZED")
+	} else if (e == CUBLAS_STATUS_INVALID_VALUE) {
+		RET_ERROR("CUBLAS_STATUS_INVALID_VALUE");
 	} else if (e == CUBLAS_STATUS_EXECUTION_FAILED) {
-		fprintf(stderr, "CUBLAS_STATUS_EXECUTION_FAILED\n");
+		RET_ERROR("CUBLAS_STATUS_EXECUTION_FAILED");
 	}
 
-	return 0;
+	return SUCCESS;
 }
