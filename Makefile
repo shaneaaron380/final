@@ -48,9 +48,9 @@ $(OBJ_DIR):
 
 run: $(TARGET) $(INPUTS)
 	./$(TARGET) \
-		inputs/test_input_3_tri.txt \
-		inputs/test_input_3_threes.txt 1.0 G \
-		obj/test_input_3_tri.txt.gpu.out
+		inputs/test_input_1024_tri.txt \
+		inputs/test_input_1024_ones.txt 1.0 G \
+		obj/test_input_1024_tri.txt.gpu.out
 
 run1: $(TARGET) $(INPUTS)
 	./$(TARGET) inputs/test_input_64_inc.txt inputs/test_input_64_inc.txt 1.0 G obj/test_input_64_inc.txt.gpu.out
