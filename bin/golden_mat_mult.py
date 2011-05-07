@@ -1,6 +1,7 @@
 #! /usr/bin/env python
 
 import sys,os,array,cProfile
+import numpy
 
 def Usage():
 	print 'USAGE: %s <input matrix A> <input matrix B>' % sys.argv[0]
@@ -45,20 +46,25 @@ class matrix(object):
 
 		return C
 
+def matrix_fromfile(f):
+	f.readline()
+	m = numpy.matrix(f.read().strip().replace('\n', ';'))
+	return m
 
 def main():
 	if len(sys.argv) != 3 or sys.argv[1] == '-h' or sys.argv[1] == '--help':
 		Usage()
 
-	A = matrix(sys.argv[1])
-	B = matrix(sys.argv[2])
+	A = matrix_fromfile(open(sys.argv[1]))
+	B = matrix_fromfile(open(sys.argv[2]))
 
-	C = A * B
+	C = A.I * B
 
-	print C.width, C.height
-	for i in xrange(C.height):
-		[ sys.stdout.write('%f ' % C.m[i * C.width + j]) 
-				for j in xrange(C.width) ]
+	print '%d %d' % C.shape
+
+	for i in xrange(C.shape[0]):
+		for j in xrange(C.shape[1]):
+			print '%f ' % C[i,j],
 		print ''
 
 if __name__ == '__main__': main()
