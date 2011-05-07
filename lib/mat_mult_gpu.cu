@@ -1,23 +1,26 @@
 
 #include "mat_mult_gpu.h"
 #include "cuPrintf.cu"
+//#include "cuda.h"
 
 __global__ void MatMultKernel(const Matrix A, const Matrix B, Matrix C, int n)
 {
-  int i = blockIdx.x * blockDim.x + threadIdx.x;
+  int j = blockIdx.x * blockDim.x + threadIdx.x;
   //int j = blockIdx.y * blockDim.y + threadIdx.y;
   float S;
+ 
+  //cuPrintf("%d,%d : %d,%d : %d,%d\n", blockIdx.x, blockIdx.y, blockDim.x, blockDim.y, threadIdx.x, threadIdx.y);
 
-  cuPrintf("Enter kernel with thread: %d\n", i);
-
-  for (int j = 0; j < n; j++) {
-    S = B.els[i*n+j]; //S = B[i][j];
-    cuPrintf("i=%d,j=%d, S=%f\n", i, j, S);
-    for (int k = 0; k < i; k++) {
-      S -= A.els[i*n+k] * C.els[k*n+j]; //S -= A[i][k] * C[k][j];
-      cuPrintf("k=%d, S=%f\n", k, S);
+  if (j < n) {
+    for (int i = 0; i < n; i++) {
+      S = B.els[i*n+j]; //S = B[i][j];
+      //cuPrintf("i=%d,j=%d, S=%f\n", i, j, S);
+      for (int k = 0; k < i; k++) {
+        S -= A.els[i*n+k] * C.els[k*n+j]; //S -= A[i][k] * C[k][j];
+        //cuPrintf("i=%d,j=%d,k=%d, S=%f, A=%f, C=%f\n", i, j, k, S, A.els[i*n+k], C.els[k*n+j]);
+      }
+      C.els[i*n+j] = S; //C[i][j] = S;
     }
-    C.els[i*n+j] = S; //C[i][j] = S;
   }
 
 }
@@ -26,6 +29,17 @@ __global__ void MatMultKernel(const Matrix A, const Matrix B, Matrix C, int n)
 void MatMultGPU(const Matrix A, const Matrix B, Matrix C)
 {
 	Matrix d_A, d_B, d_C;
+
+  // Initialize 
+  //cuInit(0); 
+  //
+  //// Get number of devices supporting CUDA 
+  //int deviceCount = 0; 
+  //cuDeviceGetCount(&deviceCount); 
+  //if (deviceCount == 0) { 
+  //  printf("There is no device supporting CUDA.\n"); exit (0); 
+  //}
+  int n = A.width;
 
   cudaPrintfInit();
 
@@ -46,9 +60,15 @@ void MatMultGPU(const Matrix A, const Matrix B, Matrix C)
 	size = C.width * C.height * sizeof(float);
 	cudaMalloc((void**)&d_C.els, size);
 
-	dim3 dimBlock(BLOCK_SIZE, BLOCK_SIZE);
-	dim3 dimGrid(B.width / dimBlock.x, A.height / dimBlock.y);
-	MatMultKernel<<<dimGrid, dimBlock>>>(d_A, d_B, d_C, A.width);
+	//dim3 dimBlock(BLOCK_SIZE, BLOCK_SIZE);
+	//dim3 dimBlock(A.width, A.width);
+	//dim3 dimGrid(B.width / dimBlock.x, A.height / dimBlock.y);
+  //printf("dimBlock.x = %d, dimBlock.y = %d\n", dimBlock.x, dimBlock.y);
+  int grids = n/256+1;
+  int threads = n%256;
+  printf("grids=%d, threads=%d\n", grids, threads);
+	//MatMultKernel<<<dimGrid, dimBlock>>>(d_A, d_B, d_C, A.width);
+	MatMultKernel<<<grids, threads>>>(d_A, d_B, d_C, n);
   
   cudaPrintfDisplay(stdout,true);
   cudaPrintfEnd();
