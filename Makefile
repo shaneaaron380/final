@@ -84,12 +84,12 @@ obj/mat_mult_gpu.o: lib/mat_mult_gpu.cu inc/mat_mult_gpu.h inc/matrix.h | $(OBJ_
 # testing cublas
 ################################################################################
 
-cublas: bin/my_cublas
+cublas: bin/my_cublas $(INPUTS)
 	bin/my_cublas \
-		inputs/test_cublas_A.txt \
+		inputs/test_cublas_A_unit_low.txt \
 		inputs/test_cublas_B.txt \
 		1.0 C \
-		obj/test_cublas_A.txt.out
+		obj/test_cublas_A_unit_low.txt.out
 
 bin/my_cublas: obj/my_cublas.o obj/mat_mult_cublas.o obj/matrix.o | $(OBJ_DIR)
 	$(NVCC) $(FLAGS) $(LIBS) -o $@ obj/my_cublas.o obj/mat_mult_cublas.o obj/matrix.o
@@ -102,7 +102,7 @@ obj/my_cublas.o: test/my_cublas/main.cu | $(OBJ_DIR)
 # testing sequential 
 ################################################################################
 
-sequential: bin/my_seq
+sequential: bin/my_seq $(INPUTS)
 #	$(SHELL) -c "DYLD_LIBRARY_PATH=/usr/local/cuda/lib bin/my_seq \
 		inputs/test_input_1024_tri.txt \
 		inputs/test_input_1024_ones.txt \
@@ -113,6 +113,9 @@ sequential: bin/my_seq
 		inputs/test_input_100000000_ones.txt \
 		1.0 S \
 		obj/test_input_100000000_tri.txt.seq.out
+
+sequential2: bin/my_seq $(INPUTS)
+	./bin/my_seq inputs/test_cublas_A_unit_low.txt inputs/test_cublas_B.txt 1.0 S obj/test_cublas_A_unit_low.txt.out
 
 bin/my_seq: obj/my_seq.o obj/mat_mult_seq.o obj/matrix.o | $(OBJ_DIR)
 	$(NVCC) $(FLAGS) $(LIBS) -o $@ obj/my_seq.o obj/mat_mult_seq.o obj/matrix.o
