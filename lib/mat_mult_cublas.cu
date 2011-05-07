@@ -13,50 +13,52 @@
 
 int MatMultCublas(const Matrix A, Matrix B)
 {
+	cublasStatus status = CUBLAS_STATUS_SUCCESS;
+
 	/*float A[N][N] =   { { 3.0, -1.0 },*/
 	/*                    { 0.0, -2.0 } },*/
 
 	/*      B[N][N] =   { { 1.0, 1.0 },*/
 	/*                    { 1.0, 1.0 } };*/
 
-	/*float A[7][5] =   { { 3.0, -1.0,  2.0,  2.0,  1.0 },*/
-	/*                    { 0.0, -2.0,  4.0, -1.0,  3.0 },*/
-	/*                    { 0.0,  0.0, -3.0,  0.0,  2.0 },*/
-	/*                    { 0.0,  0.0,  0.0,  4.0, -2.0 },*/
-	/*                    { 0.0,  0.0,  0.0,  0.0,  1.0 },*/
-	/*                    { 0.0,  0.0,  0.0,  0.0,  0.0 },*/
-	/*                    { 0.0,  0.0,  0.0,  0.0,  0.0 } },*/
+#if 0
+	float As[7][5] =  { { 3.0, -1.0,  2.0,  2.0,  1.0 },
+						{ 0.0, -2.0,  4.0, -1.0,  3.0 },
+						{ 0.0,  0.0, -3.0,  0.0,  2.0 },
+						{ 0.0,  0.0,  0.0,  4.0, -2.0 },
+						{ 0.0,  0.0,  0.0,  0.0,  1.0 },
+						{ 0.0,  0.0,  0.0,  0.0,  0.0 },
+						{ 0.0,  0.0,  0.0,  0.0,  0.0 } };
 
-	/*float A[5][7] =   { {  3.0,  0.0,  0.0,  0.0,  0.0,  0.0,  0.0 },*/
-	/*                    { -1.0, -2.0,  0.0,  0.0,  0.0,  0.0,  0.0 },*/
-	/*                    {  2.0,  4.0, -3.0,  0.0,  0.0,  0.0,  0.0 },*/
-	/*                    {  2.0, -1.0,  0.0,  4.0,  0.0,  0.0,  0.0 },*/
-	/*                    {  1.0,  3.0,  2.0, -2.0,  1.0,  0.0,  0.0 } },*/
+	float Bs[6][3] =  { {   6.0, 10.0,  -2.0 },
+						{ -16.0, -1.0,   6.0 },
+						{  -2.0,  1.0,  -4.0 },
+						{  14.0,  0.0, -14.0 },
+						{  -1.0,  2.0,   1.0 },
+						{   0.0,  0.0,   0.0 } };
+#else
+	float As[5][7] =  { {  3.0,  0.0,  0.0,  0.0,  0.0,  0.0,  0.0 },
+						{ -1.0, -2.0,  0.0,  0.0,  0.0,  0.0,  0.0 },
+						{  2.0,  4.0, -3.0,  0.0,  0.0,  0.0,  0.0 },
+						{  2.0, -1.0,  0.0,  4.0,  0.0,  0.0,  0.0 },
+						{  1.0,  3.0,  2.0, -2.0,  1.0,  0.0,  0.0 } };
 
-		  /*B[6][3] =   { {   6.0, 10.0,  -2.0 },*/
-		  /*              { -16.0, -1.0,   6.0 },*/
-		  /*              {  -2.0,  1.0,  -4.0 },*/
-		  /*              {  14.0,  0.0, -14.0 },*/
-		  /*              {  -1.0,  2.0,   1.0 },*/
-		  /*              {   0.0,  0.0,   0.0 } };*/
+	float Bs[3][6] =  { {   6.0, -16.0,  -2.0,  14.0,  -1.0,   0.0 },
+						{  10.0,  -1.0,   1.0,   0.0,   2.0,   0.0 },
+						{  -2.0,   6.0,  -4.0, -14.0,   1.0,   0.0 } };
+#endif
 
-		  /*B[3][6] =   { {   6.0, -16.0,  -2.0,  14.0,  -1.0,   0.0 },*/
-		  /*              {  10.0,  -1.0,   1.0,   0.0,   2.0,   0.0 },*/
-		  /*              {  -2.0,   6.0,  -4.0, -14.0,   1.0,   0.0 } };*/
+	if (cublasInit() != CUBLAS_STATUS_SUCCESS)
+		RET_ERROR("cublasInit failed");
 
 	Matrix d_A, d_B;
 
-	d_A.height = A.height;
-	d_A.width = A.width;
-	int A_size = d_A.height * d_A.width * sizeof(float);
-	cudaMalloc( (void**) &d_A.els, A_size);
-	cudaMemcpy(d_A.els, A.els, A_size, cudaMemcpyHostToDevice);
+	cublasAlloc(5*7, sizeof(float), (void**) &d_A.els);
+	cublasAlloc(3*6, sizeof(float), (void**) &d_B.els);
 
-	d_B.height = B.height;
-	d_B.width = B.width;
-	int B_size = d_B.height * d_B.width * sizeof(float);
-	cudaMalloc((void**)&d_B.els, B_size);
-	cudaMemcpy(d_B.els, B.els, B_size, cudaMemcpyHostToDevice);
+	cudaMemcpy(d_A.els, As, 5*7*sizeof(float), cudaMemcpyHostToDevice);
+
+	cudaMemcpy(d_B.els, Bs, 6*3*sizeof(float), cudaMemcpyHostToDevice);
 
 	cublasStrsm('l',		/* side: a is on the left side of B (and this X) */
 				'u',		/* uplo: upper triangular */
@@ -66,22 +68,27 @@ int MatMultCublas(const Matrix A, Matrix B)
 							   the order of A */
 				3,			/* n: number of columns in B */
 				1.0,		/* alpha: alpha scalar */
-				/*(float*) A,	[> a: 'A' matrix <]*/
 				d_A.els,	/* a: 'A' matrix */
-				5,			/* lda -- ??? */
-				/*(float*) B,	[> b: 'B' matrix <]*/
+				7,			/* lda -- ??? */
 				d_B.els,	/* b: 'B' matrix */
-				5			/* ldb -- ??? */);
+				6			/* ldb -- ??? */);
 
-	cudaMemcpy(B.els, d_B.els, B_size, cudaMemcpyDeviceToHost);
+	cudaMemcpy(Bs, d_B.els, 6*3*sizeof(float), cudaMemcpyDeviceToHost);
 
-	/*for (int i = 0; i < B.height; ++i) {*/
-	/*    for (int j = 0; j < B.width; ++j) {*/
-
-	/*        printf("%5.1f ", B.els[i * B.height + j]);*/
+	/*for (int i = 0; i < 3; ++i) {*/
+	/*    for (int j = 0; j < 6; ++j) {*/
+	/*        fprintf(stderr, "%5.1f ", Bs[i][j]);*/
 	/*    }*/
-	/*    printf("\n");*/
+	/*    fprintf(stderr, "\n");*/
 	/*}*/
+	/*fprintf(stderr, "\n");*/
+
+	for (int i = 0; i < 6; ++i) {
+		for (int j = 0; j < 3; ++j) {
+			fprintf(stderr, "%5.1lf ", ((float *) Bs)[6 * j + i]);
+		}
+		fprintf(stderr, "\n");
+	}
 
 	int e = cublasGetError();
 	if (e == CUBLAS_STATUS_NOT_INITIALIZED) {
