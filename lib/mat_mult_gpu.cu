@@ -64,11 +64,11 @@ void MatMultGPU(const Matrix A, const Matrix B, Matrix C)
 	//dim3 dimBlock(A.width, A.width);
 	//dim3 dimGrid(B.width / dimBlock.x, A.height / dimBlock.y);
   //printf("dimBlock.x = %d, dimBlock.y = %d\n", dimBlock.x, dimBlock.y);
-  int grids = n/256+1;
-  int threads = n%256;
-  printf("grids=%d, threads=%d\n", grids, threads);
+  int threadsPerBlock = 256;
+  int blocksPerGrid = (n+threadsPerBlock-1)/threadsPerBlock;
+  printf("grids=%d, threads=%d\n", blocksPerGrid, threadsPerBlock);
 	//MatMultKernel<<<dimGrid, dimBlock>>>(d_A, d_B, d_C, A.width);
-	MatMultKernel<<<grids, threads>>>(d_A, d_B, d_C, n);
+	MatMultKernel<<<blocksPerGrid, threadsPerBlock>>>(d_A, d_B, d_C, n);
   
   cudaPrintfDisplay(stdout,true);
   cudaPrintfEnd();

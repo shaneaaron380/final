@@ -57,8 +57,8 @@ run1: $(TARGET) $(INPUTS)
 
 run2: $(TARGET) $(INPUTS)
 	./$(TARGET) \
-		inputs/test_input_100000000_tri.txt 1.0 C \
-		inputs/test_input_100000000_ones.txt  \
+		inputs/test_input_100000000_tri.txt \
+		inputs/test_input_100000000_ones.txt 1.0 C \
 		obj/test_input_100000000_tri.txt.out
 
 ################################################################################
