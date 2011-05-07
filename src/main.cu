@@ -1,7 +1,9 @@
 #include <stdio.h>
 
-#include "mat_mult_from_doc.h"
+//#include "mat_mult_from_doc.h"
 #include "mat_mult_cublas.h"
+#include "mat_mult_gpu.h"
+#include "mat_mult_seq.h"
 
 void Usage(int retVal, char *argv0)
 {
@@ -46,7 +48,7 @@ int main(int argc, char *argv[])
 	if (! (C.els = (float*) malloc(A.height * B.width * sizeof(C.els[0]))))
 		RET_ERROR("could not allocate space for results matrix");
 
-	MatMult(A, B, C);
+	MatMultGPU(A, B, C);
 
 	if (MatrixToFile(argv[5], &C) != SUCCESS)
 		RET_ERROR("could not write result matrix to %s", argv[5]);

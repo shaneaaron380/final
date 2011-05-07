@@ -35,10 +35,10 @@ inputs: $(INPUTS)
 # main application
 ################################################################################
 
-$(TARGET): obj/main.o obj/matrix.o obj/mat_mult_from_doc.o obj/mat_mult_cublas.o
-	$(NVCC) $(FLAGS) $(LIBS) -o $@ obj/main.o obj/matrix.o obj/mat_mult_from_doc.o obj/mat_mult_cublas.o
+$(TARGET): obj/main.o obj/matrix.o obj/mat_mult_gpu.o obj/mat_mult_cublas.o obj/mat_mult_seq.o
+	$(NVCC) $(FLAGS) $(LIBS) -o $@ obj/main.o obj/matrix.o obj/mat_mult_gpu.o obj/mat_mult_cublas.o obj/mat_mult_seq.o
 
-obj/main.o: src/main.cu inc/matrix.h inc/mat_mult_from_doc.h inc/mat_mult_cublas.h | $(OBJ_DIR)
+obj/main.o: src/main.cu inc/matrix.h inc/mat_mult_gpu.h inc/mat_mult_cublas.h inc/mat_mult_seq.h | $(OBJ_DIR)
 	$(NVCC) $(FLAGS) -c -o $@ $<
 
 $(OBJ_DIR):
@@ -46,9 +46,9 @@ $(OBJ_DIR):
 
 run: $(TARGET) $(INPUTS)
 	$(SHELL) -c "DYLD_LIBRARY_PATH=/usr/local/cuda/lib ./$(TARGET) \
-		inputs/test_input_64_inc.txt \
-		inputs/test_input_64_inc.txt 1.0 C \
-		obj/test_input_64_inc.txt.out"
+		inputs/test_input_3_tri.txt \
+		inputs/test_input_3_threes.txt 1.0 G \
+		obj/test_input_3_tri.txt.gpu.out"
 
 run2: $(TARGET) $(INPUTS)
 	$(SHELL) -c "DYLD_LIBRARY_PATH=/usr/local/cuda/lib ./$(TARGET) \
@@ -70,6 +70,9 @@ obj/mat_mult_cublas.o: lib/mat_mult_cublas.cu inc/mat_mult_cublas.h inc/matrix.h
 	$(NVCC) $(FLAGS) $(LIBS) -c -o $@ $<
 
 obj/mat_mult_seq.o: lib/mat_mult_seq.cu inc/mat_mult_seq.h inc/matrix.h | $(OBJ_DIR)
+	$(NVCC) $(FLAGS) $(LIBS) -c -o $@ $<
+
+obj/mat_mult_gpu.o: lib/mat_mult_gpu.cu inc/mat_mult_gpu.h inc/matrix.h | $(OBJ_DIR)
 	$(NVCC) $(FLAGS) $(LIBS) -c -o $@ $<
 
 ################################################################################
