@@ -17,31 +17,34 @@ void Usage(int retVal, char *argv0)
 int GetInputs(int argc, char *argv[], Matrix *a, Matrix *b, float *alpha, char
 		*which, int *useOldFormat)
 {
-	*useOldFormat = 0;
+	int trans = MATRIX_FILE_NO_TRANSPOSE;
+
+	*which = argv[4][0];
+	if (*which == 'C')
+		trans = MATRIX_FILE_TRANSPOSE;
 
 	if (argc < 6)
 		RET_ERROR("must have at least 5 cmd line args");
 
+	*useOldFormat = 0;
 	if (argc > 6 && strncmp(argv[6], "o", 2) == 0)
 		*useOldFormat = 1;
 
 	if (useOldFormat) {
-		if (MatrixFromFile(argv[1], a, MATRIX_FILE_NO_TRANSPOSE) != SUCCESS)
+		if (MatrixFromFile(argv[1], a, trans) != SUCCESS)
 			RET_ERROR("could not read matrix A");
 
-		if (MatrixFromFile(argv[2], b, MATRIX_FILE_NO_TRANSPOSE) != SUCCESS)
+		if (MatrixFromFile(argv[2], b, trans) != SUCCESS)
 			RET_ERROR("could not read matrix B");
 	} else {
-		if (MatrixFromCOOFile(argv[1], a, MATRIX_FILE_NO_TRANSPOSE) != SUCCESS)
+		if (MatrixFromCOOFile(argv[1], a, trans) != SUCCESS)
 			RET_ERROR("could not read matrix A");
 
-		if (MatrixFromCOOFile(argv[2], b, MATRIX_FILE_NO_TRANSPOSE) != SUCCESS)
+		if (MatrixFromCOOFile(argv[2], b, trans) != SUCCESS)
 			RET_ERROR("could not read matrix B");
 	}
 
 	*alpha = strtof(argv[3], (char**)NULL);
-
-	*which = argv[4][0];
 
 	return SUCCESS;
 }
@@ -53,12 +56,17 @@ int main(int argc, char *argv[])
 	float alpha;
 	char which;
 	int useOldFormat;
+	int trans = MATRIX_FILE_NO_TRANSPOSE;
 
 	if (GetInputs(argc, argv, &A, &B, &alpha, &which, &useOldFormat) != SUCCESS)
 		Usage(1, argv[0]);
 
 	if (which == 'C') {
+		printf("Using CUBLAS implementation\n");
 		out = &B;
+		trans = MATRIX_FILE_TRANSPOSE;
+		if (MatMultCublas(A, B) != SUCCESS)
+			RET_ERROR("MatMultCublas failed");
 
 	} else {
 		out = &C;
@@ -69,17 +77,19 @@ int main(int argc, char *argv[])
 			RET_ERROR("could not allocate space for results matrix");
 
 		if (which == 'G') {
+			printf("Using GPU implementation\n");
 			MatMultGPU(A, B, C);
 		} else {
-			MatMultSeq(&A, &B, &X, alpha); 
+			printf("Using sequential implementation\n");
+			MatMultSeq(&A, &B, &C, alpha); 
 		}
 	}
 
 	if (useOldFormat) {
-		if (MatrixToFile(argv[5], out, MATRIX_FILE_NO_TRANSPOSE) != SUCCESS)
+		if (MatrixToFile(argv[5], out, trans) != SUCCESS)
 			RET_ERROR("could not write result matrix to %s", argv[5]);
 	} else {
-		if (MatrixToCOOFile(argv[5], out, MATRIX_FILE_NO_TRANSPOSE) != SUCCESS)
+		if (MatrixToCOOFile(argv[5], out, trans) != SUCCESS)
 			RET_ERROR("could not write result matrix to %s", argv[5]);
 	}
 
