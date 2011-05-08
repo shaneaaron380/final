@@ -10,4 +10,4 @@
 #$ -M astacy #Replace with your email id
 #$ -A A-cs41 #Project Name - Do not change this
 #$ -P data
-make all
+make run_all
