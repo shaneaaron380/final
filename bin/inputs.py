@@ -5,6 +5,16 @@ import sys,os,inspect,urllib2
 INPUTS_DIR = 'inputs'
 EXTENSION = 'txt'
 
+_inputs_seed = 0
+def rand_num_gen():
+	global _inputs_seed
+	while True:
+		r = _inputs_seed % 107 # a not-too large prime num
+		_inputs_seed += _inputs_seed % 107 + 1
+		if _inputs_seed % 2 == 0:
+			r *= -1
+		yield r
+
 def input_name_from_func_name(func_name):
 	"""
 	this is where we'll generate the cannonical output name from a function
