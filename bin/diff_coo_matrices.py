@@ -64,10 +64,13 @@ def main():
 				continue
 
 			if round(a[i*l + j], 2) != round(b[i*l + j], 2):
-				sys.stdout.write(
+				sys.stderr.write(
 					'ERROR: element (%d, %d) doesn\'t match: %f %f\n' % \
 							(i, j, a[i*l + j], b[i*l + j]))
 				errors += 1
+
+	if errors > 0:
+		print 'Found %d errors' % errors
 
 	return errors
 

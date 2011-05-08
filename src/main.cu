@@ -9,22 +9,33 @@ void Usage(int retVal, char *argv0)
 {
 	fprintf(retVal == 0? stdout : stderr,
 			"USAGE: %s <matrix A input file> <matrix B input file> "
-			"<output matrix file> <alpha> <S,G,C>\n", argv0);
+			"<output matrix file> <alpha> <S,G,C> [o]\n", argv0);
 
 	exit(retVal);
 }
 
 int GetInputs(int argc, char *argv[], Matrix *a, Matrix *b, float *alpha, char
-		*which)
+		*which, int *useOldFormat)
 {
-	if (argc != 6)
+	if (argc < 6)
 		RET_ERROR("must have 5 cmd line args");
 
-	if (MatrixFromFile(argv[1], a, MATRIX_FILE_NO_TRANSPOSE) != SUCCESS)
-		RET_ERROR("could not read matrix A");
+	if (argc > 6 && strncmp(argv[6], "o", 2) == 0)
+		*useOldFormat = 1;
 
-	if (MatrixFromFile(argv[2], b, MATRIX_FILE_NO_TRANSPOSE) != SUCCESS)
-		RET_ERROR("could not read matrix B");
+	if (useOldFormat) {
+		if (MatrixFromFile(argv[1], a, MATRIX_FILE_NO_TRANSPOSE) != SUCCESS)
+			RET_ERROR("could not read matrix A");
+
+		if (MatrixFromFile(argv[2], b, MATRIX_FILE_NO_TRANSPOSE) != SUCCESS)
+			RET_ERROR("could not read matrix B");
+	} else {
+		if (MatrixFromCOOFile(argv[1], a, MATRIX_FILE_NO_TRANSPOSE) != SUCCESS)
+			RET_ERROR("could not read matrix A");
+
+		if (MatrixFromCOOFile(argv[2], b, MATRIX_FILE_NO_TRANSPOSE) != SUCCESS)
+			RET_ERROR("could not read matrix B");
+	}
 
 	*alpha = strtof(argv[3], (char**)NULL);
 
@@ -38,8 +49,9 @@ int main(int argc, char *argv[])
 	Matrix A, B, C;
 	float alpha;
 	char which;
+	int useOldFormat;
 
-	if (GetInputs(argc, argv, &A, &B, &alpha, &which) != SUCCESS)
+	if (GetInputs(argc, argv, &A, &B, &alpha, &which, &useOldFormat) != SUCCESS)
 		Usage(1, argv[0]);
 
 	C.height = A.height;
@@ -50,8 +62,13 @@ int main(int argc, char *argv[])
 
 	MatMultGPU(A, B, C);
 
-	if (MatrixToFile(argv[5], &C, MATRIX_FILE_NO_TRANSPOSE) != SUCCESS)
-		RET_ERROR("could not write result matrix to %s", argv[5]);
+	if (useOldFormat) {
+		if (MatrixToFile(argv[5], &C, MATRIX_FILE_NO_TRANSPOSE) != SUCCESS)
+			RET_ERROR("could not write result matrix to %s", argv[5]);
+	} else {
+		if (MatrixToCOOFile(argv[5], &C, MATRIX_FILE_NO_TRANSPOSE) != SUCCESS)
+			RET_ERROR("could not write result matrix to %s", argv[5]);
+	}
 
 	return 0;
 }

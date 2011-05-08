@@ -50,40 +50,67 @@ run: $(TARGET) $(INPUTS)
 	./$(TARGET) \
 		inputs/test_input_1024_tri.txt \
 		inputs/test_input_1024_ones.txt 1.0 G \
-		obj/test_input_1024_tri.txt.gpu.out
+		obj/test_input_1024_tri.txt.gpu.out o
 
 run1: $(TARGET) $(INPUTS)
-	./$(TARGET) inputs/test_input_64_inc.txt inputs/test_input_64_inc.txt 1.0 G obj/test_input_64_inc.txt.gpu.out
+	./$(TARGET) inputs/test_input_64_inc.txt inputs/test_input_64_inc.txt 1.0 G obj/test_input_64_inc.txt.gpu.out o
 
 run2: $(TARGET) $(INPUTS)
 	./$(TARGET) \
 		inputs/test_input_100000000_tri.txt \
 		inputs/test_input_100000000_ones.txt 1.0 C \
-		obj/test_input_100000000_tri.txt.out
+		obj/test_input_100000000_tri.txt.out o
 
 run3: $(TARGET) $(INPUTS)
 	./$(TARGET) \
 		inputs/test_input_90000_tri.txt \
 		inputs/test_input_90000_ones.txt 1.0 C \
-		obj/test_input_90000_tri.txt.out
+		obj/test_input_90000_tri.txt.out o
 
 run4: $(TARGET) $(INPUTS)
 	./$(TARGET) \
 		inputs/test_input_25000000_tri.txt \
 		inputs/test_input_25000000_ones.txt 1.0 C \
-		obj/test_input_25000000_tri.txt.out
+		obj/test_input_25000000_tri.txt.out o
 
 run5: $(TARGET) $(INPUTS)
 	./$(TARGET) \
 		inputs/test_input_4000000_tri.txt \
 		inputs/test_input_4000000_ones.txt 1.0 C \
-		obj/test_input_4000000_tri.txt.out
+		obj/test_input_4000000_tri.txt.out o
 
 run6: $(TARGET) $(INPUTS)
 	./$(TARGET) \
 		inputs/test_input_1000000_tri.txt \
 		inputs/test_input_1000000_ones.txt 1.0 C \
-		obj/test_input_1000000_tri.txt.out
+		obj/test_input_1000000_tri.txt.out o
+
+gpu1: $(TARGET) $(INPUTS)
+	./$(TARGET) \
+		inputs/test_input_1a.txt \
+		inputs/test_input_1b.txt 1.0 C \
+		obj/test_input_1.txt.gpu.out
+	bin/diff_coo_matrices.py \
+		obj/test_input_1.txt.gpu.out \
+		inputs/test_input_1_golden.txt 2>/dev/null
+
+gpu2: $(TARGET) $(INPUTS)
+	./$(TARGET) \
+		inputs/test_input_2a.txt \
+		inputs/test_input_2b.txt 1.0 C \
+		obj/test_input_2.txt.gpu.out
+	bin/diff_coo_matrices.py \
+		obj/test_input_2.txt.gpu.out \
+		inputs/test_input_2_golden.txt 2>/dev/null
+
+gpu3: $(TARGET) $(INPUTS)
+	./$(TARGET) \
+		inputs/test_input_3a.txt \
+		inputs/test_input_3b.txt 1.0 C \
+		obj/test_input_3.txt.gpu.out
+	bin/diff_coo_matrices.py \
+		obj/test_input_3.txt.gpu.out \
+		inputs/test_input_3_golden.txt 2>/dev/null
 
 ################################################################################
 # libraries
@@ -151,7 +178,30 @@ cublas1: bin/my_cublas $(INPUTS)
 		inputs/test_input_1a.txt \
 		inputs/test_input_1b.txt \
 		1.0 C \
-		obj/test_input_1_out.txt
+		obj/test_input_1.txt.cublas.out
+	bin/diff_coo_matrices.py \
+		obj/test_input_1.txt.cublas.out \
+		inputs/test_input_1_golden.txt 2>/dev/null
+
+cublas2: bin/my_cublas $(INPUTS)
+	bin/my_cublas \
+		inputs/test_input_2a.txt \
+		inputs/test_input_2b.txt \
+		1.0 C \
+		obj/test_input_2.txt.cublas.out
+	bin/diff_coo_matrices.py \
+		obj/test_input_2.txt.cublas.out \
+		inputs/test_input_2_golden.txt 2>/dev/null
+
+cublas3: bin/my_cublas $(INPUTS)
+	bin/my_cublas \
+		inputs/test_input_3a.txt \
+		inputs/test_input_3b.txt \
+		1.0 C \
+		obj/test_input_3.txt.cublas.out
+	bin/diff_coo_matrices.py \
+		obj/test_input_3.txt.cublas.out \
+		inputs/test_input_3_golden.txt 2>/dev/null
 
 bin/my_cublas: obj/my_cublas.o obj/mat_mult_cublas.o obj/matrix.o | $(OBJ_DIR)
 	$(NVCC) $(FLAGS) $(LIBS) -o $@ obj/my_cublas.o obj/mat_mult_cublas.o obj/matrix.o
@@ -174,10 +224,10 @@ sequential: bin/my_seq $(INPUTS)
 		inputs/test_input_100000000_tri.txt \
 		inputs/test_input_100000000_ones.txt \
 		1.0 S \
-		obj/test_input_100000000_tri.txt.seq.out
+		obj/test_input_100000000_tri.txt.seq.out o
 
-sequential2: bin/my_seq $(INPUTS)
-	./bin/my_seq inputs/test_cublas_A_unit_low.txt inputs/test_cublas_B.txt 1.0 S obj/test_cublas_A_unit_low.txt.out
+sequentialsmall: bin/my_seq $(INPUTS)
+	./bin/my_seq inputs/test_cublas_A_unit_low.txt inputs/test_cublas_B.txt 1.0 S obj/test_cublas_A_unit_low.txt.out o
 
 bin/my_seq: obj/my_seq.o obj/mat_mult_seq.o obj/matrix.o | $(OBJ_DIR)
 	$(NVCC) $(FLAGS) $(LIBS) -o $@ obj/my_seq.o obj/mat_mult_seq.o obj/matrix.o
