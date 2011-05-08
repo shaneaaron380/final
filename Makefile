@@ -187,6 +187,39 @@ obj/my_seq.o: test/my_seq/main.cu | $(OBJ_DIR)
 
 
 ################################################################################
+# testing matrix i/o
+################################################################################
+
+conversions: bin/old_to_coo bin/coo_to_old $(INPUTS)
+	bin/old_to_coo inputs/test_cublas_A.txt > obj/test_cublas_A.txt.coo
+	bin/coo_to_old obj/test_cublas_A.txt.coo > obj/test_cublas_A.txt.coo.txt
+	bin/diff_matrices.py inputs/test_cublas_A.txt obj/test_cublas_A.txt.coo.txt
+	@
+	bin/old_to_coo inputs/test_cublas_A.txt t > obj/test_cublas_A.txt.coo
+	bin/coo_to_old obj/test_cublas_A.txt.coo t > obj/test_cublas_A.txt.coo.txt
+	bin/diff_matrices.py inputs/test_cublas_A.txt obj/test_cublas_A.txt.coo.txt
+	@
+	bin/coo_to_old inputs/test_input_1a.txt > obj/test_input_1a.txt.old
+	bin/old_to_coo obj/test_input_1a.txt.old > obj/test_input_1a.txt.old.txt
+	bin/diff_coo_matrices.py inputs/test_input_1a.txt obj/test_input_1a.txt.old.txt
+	@
+	bin/coo_to_old inputs/test_input_1a.txt t > obj/test_input_1a.txt.old
+	bin/old_to_coo obj/test_input_1a.txt.old > obj/test_input_1a.txt.old.txt
+	bin/diff_coo_matrices.py inputs/test_input_1a.txt obj/test_input_1a.txt.old.txt
+
+bin/old_to_coo: obj/old_to_coo.o obj/matrix.o | $(OBJ_DIR)
+	$(NVCC) $(FLAGS) $(LIBS) -o $@ obj/old_to_coo.o obj/matrix.o
+
+obj/old_to_coo.o: test/old_to_coo/main.cu | $(OBJ_DIR)
+	$(NVCC) $(FLAGS) $(LIBS) -c -o $@ $<
+
+bin/coo_to_old: obj/coo_to_old.o obj/matrix.o | $(OBJ_DIR)
+	$(NVCC) $(FLAGS) $(LIBS) -o $@ obj/coo_to_old.o obj/matrix.o
+
+obj/coo_to_old.o: test/coo_to_old/main.cu | $(OBJ_DIR)
+	$(NVCC) $(FLAGS) $(LIBS) -c -o $@ $<
+
+################################################################################
 # housekeeping
 ################################################################################
 
