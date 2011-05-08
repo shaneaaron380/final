@@ -3,7 +3,7 @@
 #include "cuPrintf.cu"
 //#include "cuda.h"
 
-__global__ void MatMultKernel(const Matrix A, const Matrix B, Matrix C, int n)
+__global__ void MatMultKernel(const Matrix A, const Matrix B, Matrix C, const float alpha, int n)
 {
   int l = 0;
   int j = blockIdx.x * blockDim.x + threadIdx.x;
@@ -13,7 +13,7 @@ __global__ void MatMultKernel(const Matrix A, const Matrix B, Matrix C, int n)
   if (j < n) {
     //cuPrintf("%d,%d : %d,%d : %d,%d\n", blockIdx.x, blockIdx.y, blockDim.x, blockDim.y, threadIdx.x, threadIdx.y);
     for (int i = 0; i < n; i++) {
-      S = B.els[i*n+j]; //S = B[i][j];
+      S = alpha*B.els[i*n+j]; //S = B[i][j];
       //cuPrintf("i=%d,j=%d, S=%f\n", i, j, S);
       for (int k = 0; k < i; k++) {
         //S -= A.els[i*n+k] * C.els[k*n+j]; //S -= A[i][k] * C[k][j];
@@ -46,7 +46,7 @@ void TruncateMatrix(Matrix A) {
 }
 
 // matrix dimensions are assumed to be multiples of BLOCK_SIZE
-void MatMultGPU(const Matrix A, const Matrix B, Matrix C)
+void MatMultGPU(const Matrix A, const Matrix B, Matrix C, const float alpha)
 {
 	Matrix d_A, d_B, d_C;
 
@@ -102,7 +102,7 @@ void MatMultGPU(const Matrix A, const Matrix B, Matrix C)
   int blocksPerGrid = (n+threadsPerBlock-1)/threadsPerBlock;
   printf("grids=%d, threads=%d\n", blocksPerGrid, threadsPerBlock);
 	//MatMultKernel<<<dimGrid, dimBlock>>>(d_A, d_B, d_C, A.width);
-	MatMultKernel<<<blocksPerGrid, threadsPerBlock>>>(d_A, d_B, d_C, n);
+	MatMultKernel<<<blocksPerGrid, threadsPerBlock>>>(d_A, d_B, d_C, alpha, n);
   
   cudaPrintfDisplay(stdout,true);
   cudaPrintfEnd();

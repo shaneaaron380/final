@@ -78,7 +78,7 @@ int main(int argc, char *argv[])
 
 		if (which == 'G') {
 			printf("Using GPU implementation\n");
-			MatMultGPU(A, B, C);
+			MatMultGPU(A, B, C, alpha);
 		} else {
 			printf("Using sequential implementation\n");
 			MatMultSeq(&A, &B, &C, alpha); 
