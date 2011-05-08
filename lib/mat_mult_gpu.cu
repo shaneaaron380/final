@@ -1,6 +1,7 @@
 
 #include "mat_mult_gpu.h"
 #include "cuPrintf.cu"
+#include "sys/time.h"
 //#include "cuda.h"
 
 __global__ void MatMultKernel(const Matrix A, const Matrix B, Matrix C, const float alpha, int n)
@@ -62,6 +63,9 @@ void MatMultGPU(const Matrix A, const Matrix B, Matrix C, const float alpha)
   //printf("deviceCount=%d\n", deviceCount);
   int n = A.width;
 	cudaError_t cudaMallocReturnStatus;
+	struct timeval timerValues;
+	double start_time, end_time;
+	timerclear(&timerValues);	
 
   cudaPrintfInit();
 
@@ -72,27 +76,39 @@ void MatMultGPU(const Matrix A, const Matrix B, Matrix C, const float alpha)
 	cudaMalloc((void**)&d_A.els, size);
 	cudaMallocReturnStatus = cudaMalloc((void**)&d_A.els, size);
 	if (cudaMallocReturnStatus == cudaErrorMemoryAllocation) {
-		printf("Couldn't allocate Matrix A on GPU, exiting\n"); exit(0);
+		printf("ERROR: Couldn't allocate Matrix A on GPU, exiting\n"); exit(0);
 	}
   TruncateMatrix(A);
-	cudaMemcpy(d_A.els, A.els, size, cudaMemcpyHostToDevice);
+	//cudaMemcpy(d_A.els, A.els, size, cudaMemcpyHostToDevice);
 
 	d_B.width = d_B.stride = B.width;
 	d_B.height = B.height;
 	size = B.width * B.height * sizeof(float);
 	cudaMalloc((void**)&d_B.els, size);
 	if (cudaMallocReturnStatus == cudaErrorMemoryAllocation) {
-		printf("Couldn't allocate Matrix B on GPU, exiting\n"); exit(0);
+		printf("ERROR: Couldn't allocate Matrix B on GPU, exiting\n"); exit(0);
 	}
-	cudaMemcpy(d_B.els, B.els, size, cudaMemcpyHostToDevice);
+	//cudaMemcpy(d_B.els, B.els, size, cudaMemcpyHostToDevice);
 
 	d_C.width = d_C.stride = C.width;
 	d_C.height = C.height;
 	size = C.width * C.height * sizeof(float);
 	cudaMalloc((void**)&d_C.els, size);
 	if (cudaMallocReturnStatus == cudaErrorMemoryAllocation) {
-		printf("Couldn't allocate Matrix C on GPU, exiting\n"); exit(0);
+		printf("ERROR: Couldn't allocate Matrix C on GPU, exiting\n"); exit(0);
 	}
+
+	
+	//Get start time
+	if (gettimeofday(&timerValues, NULL))
+		printf("WARNING: Counldn't get start time of day\n");
+	
+	//if (timerisset(&timerValues)) 
+	start_time = (double) timerValues.tv_sec	+ (double) (timerValues.tv_usec)/1000000;
+	printf("Start secs: %ld, Start usecs: %ld, Time: %f\n", timerValues.tv_sec, timerValues.tv_usec, start_time);
+	
+	cudaMemcpy(d_A.els, A.els, size, cudaMemcpyHostToDevice);
+	cudaMemcpy(d_B.els, B.els, size, cudaMemcpyHostToDevice);
 
 	//dim3 dimBlock(BLOCK_SIZE, BLOCK_SIZE);
 	//dim3 dimBlock(A.width, A.width);
@@ -108,6 +124,13 @@ void MatMultGPU(const Matrix A, const Matrix B, Matrix C, const float alpha)
   cudaPrintfEnd();
 
 	cudaMemcpy(C.els, d_C.els, size, cudaMemcpyDeviceToHost);
+	//Get end time
+	if (gettimeofday(&timerValues, NULL))
+		printf("WARNING: Counldn't get end time of day\n");
+	
+	//if (timerisset(&timerValues)) 
+	end_time = (double) timerValues.tv_sec	+ (double) (timerValues.tv_usec)/1000000;
+	printf("End secs: %ld, End usecs: %ld, Total Time: %f\n", timerValues.tv_sec, timerValues.tv_usec, end_time-start_time);
 
 	cudaFree(d_A.els);
 	cudaFree(d_B.els);
