@@ -71,7 +71,7 @@ void MatMultGPU(const Matrix A, const Matrix B, Matrix C)
 	cudaMalloc((void**)&d_A.els, size);
 	cudaMallocReturnStatus = cudaMalloc((void**)&d_A.els, size);
 	if (cudaMallocReturnStatus == cudaErrorMemoryAllocation) {
-		printf("Couldn't allocate A on CPU, exiting\n"); exit(0);
+		printf("Couldn't allocate Matrix A on GPU, exiting\n"); exit(0);
 	}
   TruncateMatrix(A);
 	cudaMemcpy(d_A.els, A.els, size, cudaMemcpyHostToDevice);
@@ -81,7 +81,7 @@ void MatMultGPU(const Matrix A, const Matrix B, Matrix C)
 	size = B.width * B.height * sizeof(float);
 	cudaMalloc((void**)&d_B.els, size);
 	if (cudaMallocReturnStatus == cudaErrorMemoryAllocation) {
-		printf("Couldn't allocate B on CPU, exiting\n"); exit(0);
+		printf("Couldn't allocate Matrix B on GPU, exiting\n"); exit(0);
 	}
 	cudaMemcpy(d_B.els, B.els, size, cudaMemcpyHostToDevice);
 
@@ -90,7 +90,7 @@ void MatMultGPU(const Matrix A, const Matrix B, Matrix C)
 	size = C.width * C.height * sizeof(float);
 	cudaMalloc((void**)&d_C.els, size);
 	if (cudaMallocReturnStatus == cudaErrorMemoryAllocation) {
-		printf("Couldn't allocate C on CPU, exiting\n"); exit(0);
+		printf("Couldn't allocate Matrix C on GPU, exiting\n"); exit(0);
 	}
 
 	//dim3 dimBlock(BLOCK_SIZE, BLOCK_SIZE);
