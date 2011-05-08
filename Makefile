@@ -63,31 +63,31 @@ run1: $(TARGET) $(INPUTS)
 run2: $(TARGET) $(INPUTS)
 	./$(TARGET) \
 		inputs/test_input_100000000_tri.txt \
-		inputs/test_input_100000000_ones.txt 1.0 C \
+		inputs/test_input_100000000_ones.txt 1.0 G \
 		obj/test_input_100000000_tri.txt.out o
 
 run3: $(TARGET) $(INPUTS)
 	./$(TARGET) \
 		inputs/test_input_90000_tri.txt \
-		inputs/test_input_90000_ones.txt 1.0 C \
+		inputs/test_input_90000_ones.txt 1.0 G \
 		obj/test_input_90000_tri.txt.out o
 
 run4: $(TARGET) $(INPUTS)
 	./$(TARGET) \
 		inputs/test_input_25000000_tri.txt \
-		inputs/test_input_25000000_ones.txt 1.0 C \
+		inputs/test_input_25000000_ones.txt 1.0 G \
 		obj/test_input_25000000_tri.txt.out o
 
 run5: $(TARGET) $(INPUTS)
 	./$(TARGET) \
 		inputs/test_input_4000000_tri.txt \
-		inputs/test_input_4000000_ones.txt 1.0 C \
+		inputs/test_input_4000000_ones.txt 1.0 G \
 		obj/test_input_4000000_tri.txt.out o
 
 run6: $(TARGET) $(INPUTS)
 	./$(TARGET) \
 		inputs/test_input_1000000_tri.txt \
-		inputs/test_input_1000000_ones.txt 1.0 C \
+		inputs/test_input_1000000_ones.txt 1.0 G \
 		obj/test_input_1000000_tri.txt.out o
 
 gpu:
@@ -98,19 +98,19 @@ gpu:
 gpu1: $(TARGET) $(INPUTS)
 	./$(TARGET) \
 		inputs/test_input_1a.txt \
-		inputs/test_input_1b.txt 1.0 C \
+		inputs/test_input_1b.txt 1.0 G \
 		obj/test_input_1.txt.gpu.out
 
 gpu2: $(TARGET) $(INPUTS)
 	./$(TARGET) \
 		inputs/test_input_2a.txt \
-		inputs/test_input_2b.txt 1.0 C \
+		inputs/test_input_2b.txt 1.0 G \
 		obj/test_input_2.txt.gpu.out
 
 gpu3: $(TARGET) $(INPUTS)
 	./$(TARGET) \
 		inputs/test_input_3a.txt \
-		inputs/test_input_3b.txt 1.0 C \
+		inputs/test_input_3b.txt 1.0 G \
 		obj/test_input_3.txt.gpu.out
 
 ################################################################################

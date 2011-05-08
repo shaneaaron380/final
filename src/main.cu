@@ -49,6 +49,7 @@ int GetInputs(int argc, char *argv[], Matrix *a, Matrix *b, float *alpha, char
 int main(int argc, char *argv[])
 {
 	Matrix A, B, C;
+	Matrix *out;
 	float alpha;
 	char which;
 	int useOldFormat;
@@ -56,19 +57,29 @@ int main(int argc, char *argv[])
 	if (GetInputs(argc, argv, &A, &B, &alpha, &which, &useOldFormat) != SUCCESS)
 		Usage(1, argv[0]);
 
-	C.height = A.height;
-	C.width = B.width;
-	C.stride = C.width;
-	if (! (C.els = (float*) malloc(A.height * B.width * sizeof(C.els[0]))))
-		RET_ERROR("could not allocate space for results matrix");
+	if (which == 'C') {
+		out = &B;
 
-	MatMultGPU(A, B, C);
+	} else {
+		out = &C;
+		C.height = A.height;
+		C.width = B.width;
+		C.stride = C.width;
+		if (! (C.els = (float*) malloc(A.height * B.width * sizeof(C.els[0]))))
+			RET_ERROR("could not allocate space for results matrix");
+
+		if (which == 'G') {
+			MatMultGPU(A, B, C);
+		} else {
+			MatMultSeq(&A, &B, &X, alpha); 
+		}
+	}
 
 	if (useOldFormat) {
-		if (MatrixToFile(argv[5], &C, MATRIX_FILE_NO_TRANSPOSE) != SUCCESS)
+		if (MatrixToFile(argv[5], out, MATRIX_FILE_NO_TRANSPOSE) != SUCCESS)
 			RET_ERROR("could not write result matrix to %s", argv[5]);
 	} else {
-		if (MatrixToCOOFile(argv[5], &C, MATRIX_FILE_NO_TRANSPOSE) != SUCCESS)
+		if (MatrixToCOOFile(argv[5], out, MATRIX_FILE_NO_TRANSPOSE) != SUCCESS)
 			RET_ERROR("could not write result matrix to %s", argv[5]);
 	}
 
