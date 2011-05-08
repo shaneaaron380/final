@@ -11,9 +11,9 @@ else
 endif
 
 ifneq ($(TACC_CUDA_LIB),)
-	override LIBS += -L$(TACC_CUDA_LIB) -lcublas
+	override LIBS += -L$(TACC_CUDA_LIB) -lcublas -lcudart
 else
-	override LIBS += -L/usr/local/cuda/lib -lcublas
+	override LIBS += -L/usr/local/cuda/lib -lcublas -lcuda
 	DYLD_LIBRARY_PATH := /usr/local/cuda/lib
 	export DYLD_LIBRARY_PATH
 endif
@@ -66,6 +66,24 @@ run3: $(TARGET) $(INPUTS)
 		inputs/test_input_90000_tri.txt \
 		inputs/test_input_90000_ones.txt 1.0 C \
 		obj/test_input_90000_tri.txt.out
+
+run4: $(TARGET) $(INPUTS)
+	./$(TARGET) \
+		inputs/test_input_25000000_tri.txt \
+		inputs/test_input_25000000_ones.txt 1.0 C \
+		obj/test_input_25000000_tri.txt.out
+
+run5: $(TARGET) $(INPUTS)
+	./$(TARGET) \
+		inputs/test_input_4000000_tri.txt \
+		inputs/test_input_4000000_ones.txt 1.0 C \
+		obj/test_input_4000000_tri.txt.out
+
+run6: $(TARGET) $(INPUTS)
+	./$(TARGET) \
+		inputs/test_input_1000000_tri.txt \
+		inputs/test_input_1000000_ones.txt 1.0 C \
+		obj/test_input_1000000_tri.txt.out
 
 ################################################################################
 # libraries

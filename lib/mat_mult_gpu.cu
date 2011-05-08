@@ -1,7 +1,7 @@
 
 #include "mat_mult_gpu.h"
 #include "cuPrintf.cu"
-//#include "cuda.h"
+#include "cuda.h"
 
 __global__ void MatMultKernel(const Matrix A, const Matrix B, Matrix C, int n)
 {
@@ -51,14 +51,15 @@ void MatMultGPU(const Matrix A, const Matrix B, Matrix C)
 	Matrix d_A, d_B, d_C;
 
   // Initialize 
-  //cuInit(0); 
-  //
-  //// Get number of devices supporting CUDA 
-  //int deviceCount = 0; 
-  //cuDeviceGetCount(&deviceCount); 
-  //if (deviceCount == 0) { 
-  //  printf("There is no device supporting CUDA.\n"); exit (0); 
-  //}
+  cuInit(0); 
+  
+  // Get number of devices supporting CUDA 
+  int deviceCount = 0; 
+  cuDeviceGetCount(&deviceCount); 
+  if (deviceCount == 0) { 
+    printf("There is no device supporting CUDA.\n"); exit (0); 
+  }
+  printf("deviceCount=%d\n", deviceCount);
   int n = A.width;
 	cudaError_t cudaMallocReturnStatus;
 
