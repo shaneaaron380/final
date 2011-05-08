@@ -113,14 +113,14 @@ cublas: bin/my_cublas $(INPUTS)
 		inputs/test_input_1024_tri.txt \
 		inputs/test_input_1024_ones.txt \
 		1.0 C \
-		obj/test_input_1024_tri.txt.cublas.out
+		obj/test_input_1024_tri.txt.cublas.out o
 
 cublassmall: bin/my_cublas $(INPUTS)
 	bin/my_cublas \
 		inputs/test_cublas_A_unit_low.txt \
 		inputs/test_cublas_B.txt \
 		1.0 C \
-		obj/test_cublas_A_unit_low.txt.out
+		obj/test_cublas_A_unit_low.txt.out o
 
 cublastest: cublassmall cublas
 	bin/golden_mat_mult.py \
@@ -144,13 +144,14 @@ cublaslarge: bin/my_cublas $(INPUTS)
 		inputs/test_input_100000000_tri.txt \
 		inputs/test_input_100000000_ones.txt \
 		1.0 C \
-		obj/test_input_100000000_tri.txt.cublas.out
+		obj/test_input_100000000_tri.txt.cublas.out o
 
-cublas2: bin/my_cublas $(INPUTS)
+cublas1: bin/my_cublas $(INPUTS)
 	bin/my_cublas \
-		inputs/test_input_1024_tri.txt \
-		inputs/test_input_1024_ones.txt 1.0 G \
-		obj/test_input_1024_tri.txt.cublas.out
+		inputs/test_input_1a.txt \
+		inputs/test_input_1b.txt \
+		1.0 C \
+		obj/test_input_1_out.txt
 
 bin/my_cublas: obj/my_cublas.o obj/mat_mult_cublas.o obj/matrix.o | $(OBJ_DIR)
 	$(NVCC) $(FLAGS) $(LIBS) -o $@ obj/my_cublas.o obj/mat_mult_cublas.o obj/matrix.o

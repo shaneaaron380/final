@@ -62,42 +62,32 @@ int MatrixToFile(char const* const filename, Matrix const* const m, int trans)
 	return SUCCESS;
 }
 
-/*int MatrixFromFile_T(char const* const filename, Matrix *m)*/
-/*{*/
-/*    FILE *f;*/
+int MatrixFromCOOFile(char const* const filename, Matrix *m, int trans)
+{
+	FILE *f;
+	float temp;
+	int i,j;
 
-/*    if (! (f = fopen(filename, "r")))*/
-/*        RET_ERROR("could not open %s", filename);*/
+	if (! (f = fopen(filename, "r")))
+		RET_ERROR("could not open %s", filename);
 
-/*    if (fscanf(f, "%d %d\n", &m->width, &m->height) != 2)*/
-/*        RET_ERROR("could not read width and height from %s", filename);*/
+	if (fscanf(f, "%d %d\n", &m->height, &m->width) != 2)
+		RET_ERROR("could not read width and height from %s", filename);
 
-/*    if (! (m->els = (float*) malloc(m->width * m->height * sizeof(m->els[0]))))*/
-/*        RET_ERROR("could not allocate memory for elements from %s", filename);*/
+	if (! (m->els = (float*) malloc(m->height * m->width * sizeof(m->els[0]))))
+		RET_ERROR("could not allocate memory for elements from %s", filename);
 
+	// zero out everything since we don't have any guarantees about the matrix
+	bzero(m->els, m->height * m->width * sizeof(m->els[0]));
 
-/*    fclose(f);*/
+	if (trans == MATRIX_FILE_TRANSPOSE)
+		while (fscanf(f, "%d %d %f", &i, &j, &temp) == 3)
+			m->els[i + j * m->height] = temp;
+	else
+		while (fscanf(f, "%d %d %f", &i, &j, &temp) == 3)
+			m->els[i * m->width + j] = temp;
 
-/*    return SUCCESS;*/
-/*}*/
+	fclose(f);
 
-/*int MatrixToFile_T(char const* const filename, Matrix const* const m)*/
-/*{*/
-/*    FILE *f;*/
-
-/*    if (! (f = fopen(filename, "w")))*/
-/*        RET_ERROR("could not open %s for writing", filename);*/
-
-/*    fprintf(f, "%d %d\n", m->width, m->height);*/
-
-/*    for (int i = 0; i < m->height; ++i) {*/
-/*        for (int j = 0; j < m->width; ++j)*/
-/*            fprintf(f, "%f ", m->els[j * m->height + i]);*/
-/*        fprintf(f, "\n");*/
-/*    }*/
-
-/*    fclose(f);*/
-
-/*    return SUCCESS;*/
-/*}*/
-
+	return SUCCESS;
+}
