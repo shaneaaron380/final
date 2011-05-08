@@ -1,0 +1,13 @@
+#!/bin/bash
+#$ -V
+#$ -cwd
+#$ -N gpu.1024
+#$ -j y
+#$ -o obj/$JOB_NAME.o$JOB_ID
+#$ -pe 8way 8 #read explanation below
+#$ -q development #queue name - do not change this
+#$ -l h_rt=00:03:00 #specifies resource limits - in this case, the maximum amount of time for which your job can run
+#$ -M astacy #Replace with your email id
+#$ -A A-cs41 #Project Name - Do not change this
+#$ -P data
+bin/final inputs/test_input_1024_tri.txt inputs/test_input_1024_ones.txt 1.0 C obj/test_input_1024_tri.txt.gpu.out

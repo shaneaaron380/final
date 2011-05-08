@@ -1,0 +1,14 @@
+#!/bin/bash
+#$ -V
+#$ -cwd
+#$ -N seq.90000
+#$ -j y
+#$ -o obj/$JOB_NAME.o$JOB_ID
+#$ -pe 8way 8 #read explanation below
+#$ -q development #queue name - do not change this
+#$ -l h_rt=00:03:00 #specifies resource limits - in this case, the maximum amount of time for which your job can run
+#$ -M astacy #Replace with your email id
+#$ -A A-cs41 #Project Name - Do not change this
+#$ -P data
+bin/my_seq inputs/test_input_90000_tri.txt inputs/test_input_90000_ones.txt 1.0 C obj/test_input_90000_tri.txt.seq.out
+
