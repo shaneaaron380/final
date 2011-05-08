@@ -6,6 +6,6 @@
 
 #include "matrix.h"
 
-int MatMultCublas(const Matrix A, Matrix B);
+int MatMultCublas(const Matrix A, Matrix B, const float alpha);
 
 #endif

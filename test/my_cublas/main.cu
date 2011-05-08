@@ -53,7 +53,7 @@ int main(int argc, char *argv[])
 	if (GetInputs(argc, argv, &A, &B, &alpha, &which, &useOldFormat) != SUCCESS)
 		Usage(1, argv[0]);
 
-	if (MatMultCublas(A, B) != SUCCESS)
+	if (MatMultCublas(A, B, alpha) != SUCCESS)
 		RET_ERROR("MatMultCublas failed");
 
 	if (useOldFormat) {

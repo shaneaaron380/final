@@ -11,7 +11,7 @@
 
 #define N 2
 
-int MatMultCublas(const Matrix A, Matrix B)
+int MatMultCublas(const Matrix A, Matrix B, const float alpha)
 {
 	int r;
 	if (cublasInit() != CUBLAS_STATUS_SUCCESS)
@@ -53,7 +53,7 @@ int MatMultCublas(const Matrix A, Matrix B)
 				B.height,	/* m: number of rows in B, and since 'l', it's also
 							   the order of A */
 				B.width,	/* n: number of columns in B */
-				1.0,		/* alpha: alpha scalar */
+				alpha,		/* alpha: alpha scalar */
 				d_A.els,	/* a: 'A' matrix */
 				A.height,	/* lda -- ??? */
 				d_B.els,	/* b: 'B' matrix */

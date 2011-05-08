@@ -65,7 +65,7 @@ int main(int argc, char *argv[])
 		printf("Using CUBLAS implementation\n");
 		out = &B;
 		trans = MATRIX_FILE_TRANSPOSE;
-		if (MatMultCublas(A, B) != SUCCESS)
+		if (MatMultCublas(A, B, alpha) != SUCCESS)
 			RET_ERROR("MatMultCublas failed");
 
 	} else {
