@@ -74,7 +74,7 @@ void MatMultGPU(const Matrix A, const Matrix B, Matrix C)
 	//dim3 dimBlock(A.width, A.width);
 	//dim3 dimGrid(B.width / dimBlock.x, A.height / dimBlock.y);
   //printf("dimBlock.x = %d, dimBlock.y = %d\n", dimBlock.x, dimBlock.y);
-  int threadsPerBlock = 256;
+  int threadsPerBlock = 512;
   int blocksPerGrid = (n+threadsPerBlock-1)/threadsPerBlock;
   printf("grids=%d, threads=%d\n", blocksPerGrid, threadsPerBlock);
 	//MatMultKernel<<<dimGrid, dimBlock>>>(d_A, d_B, d_C, A.width);
