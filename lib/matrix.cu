@@ -91,3 +91,33 @@ int MatrixFromCOOFile(char const* const filename, Matrix *m, int trans)
 
 	return SUCCESS;
 }
+
+int MatrixToCOOFile(char const* const filename, Matrix const* const m, int trans)
+{
+	FILE *f;
+
+	if (strncmp(filename, "-", 2) == 0)
+		f = stdout;
+	else
+		if (! (f = fopen(filename, "w")))
+			RET_ERROR("could not open %s for writing", filename);
+
+	fprintf(f, "%d %d\n", m->height, m->width);
+
+	if (trans == MATRIX_FILE_TRANSPOSE) {
+		for (int i = 0; i < m->height; ++i)
+			for (int j = 0; j < m->width; ++j)
+				if (m->els[j * m->height + i] != 0)
+					fprintf(f, "%d %d %f\n", i, j, m->els[j * m->height + i]);
+
+	} else {
+		for (int i = 0; i < m->width; ++i)
+			for (int j = 0; j < m->height; ++j)
+				if (m->els[i * m->width + j] != 0)
+					fprintf(f, "%d %d %f\n", i, j, m->els[i * m->width + j]);
+	}
+
+	fclose(f);
+
+	return SUCCESS;
+}
