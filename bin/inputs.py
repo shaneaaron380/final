@@ -132,9 +132,6 @@ def make_test_input_1024_ones():
 
 	f.close()
 
-#def make_test_input_1048576_tri():
-#    f = open
-
 def make_test_input_90000_ones():
 	f = open(this_func_input_name(), 'w')
 
@@ -220,6 +217,41 @@ def make_test_cublas_B():
 """)
 	f.close()
 
+def make_test_input_1a():
+	download('http://www.cs.utexas.edu/users/akanksha/cs380p/project/input_100_A.txt',
+			this_func_input_name())
+
+def make_test_input_1b():
+	download('http://www.cs.utexas.edu/users/akanksha/cs380p/project/input_100_B.txt',
+			this_func_input_name())
+
+def make_test_input_1_golden():
+	download('http://www.cs.utexas.edu/users/akanksha/cs380p/project/output_100.txt',
+			this_func_input_name())
+
+def make_test_input_2a():
+	download('http://www.cs.utexas.edu/users/akanksha/cs380p/project/input_1000_A.txt',
+			this_func_input_name())
+
+def make_test_input_2b():
+	download('http://www.cs.utexas.edu/users/akanksha/cs380p/project/input_1000_B.txt',
+			this_func_input_name())
+
+def make_test_input_2_golden():
+	download('http://www.cs.utexas.edu/users/akanksha/cs380p/project/output_1000.txt',
+			this_func_input_name())
+
+def make_test_input_3a():
+	download('http://www.cs.utexas.edu/users/akanksha/cs380p/project/input_5000_A.txt',
+			this_func_input_name())
+
+def make_test_input_3b():
+	download('http://www.cs.utexas.edu/users/akanksha/cs380p/project/input_5000_B.txt',
+			this_func_input_name())
+
+def make_test_input_3_golden():
+	download('http://www.cs.utexas.edu/users/akanksha/cs380p/project/output_5000.txt',
+			this_func_input_name())
 
 def Usage(ret_val = 0):
 	sys.stderr.write("""
