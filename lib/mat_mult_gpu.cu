@@ -5,6 +5,7 @@
 
 __global__ void MatMultKernel(const Matrix A, const Matrix B, Matrix C, int n)
 {
+  int l = 0;
   int j = blockIdx.x * blockDim.x + threadIdx.x;
   //int j = blockIdx.y * blockDim.y + threadIdx.y;
   float S;
@@ -15,13 +16,33 @@ __global__ void MatMultKernel(const Matrix A, const Matrix B, Matrix C, int n)
       S = B.els[i*n+j]; //S = B[i][j];
       //cuPrintf("i=%d,j=%d, S=%f\n", i, j, S);
       for (int k = 0; k < i; k++) {
-        S -= A.els[i*n+k] * C.els[k*n+j]; //S -= A[i][k] * C[k][j];
+        //S -= A.els[i*n+k] * C.els[k*n+j]; //S -= A[i][k] * C[k][j];
+        S -= A.els[l] * C.els[k*n+j]; //S -= A[i][k] * C[k][j];
+        l++;
         //cuPrintf("i=%d,j=%d,k=%d, S=%f, A=%f, C=%f\n", i, j, k, S, A.els[i*n+k], C.els[k*n+j]);
       }
       C.els[i*n+j] = S; //C[i][j] = S;
     }
   }
 
+}
+
+void TruncateMatrix(Matrix A) {
+
+  int k = 0;
+  int n = A.width;
+  //int size = (n*n-n)/2;
+
+  for (int i = 0; i < n; i++) {
+    for (int j = 0; j < n; j++) {
+      if (i == j) continue;
+      if (j < i) {
+        //assert(k<size);
+        A.els[k] = A.els[i*n+j];
+        k++;
+      }
+    }
+  }
 }
 
 // matrix dimensions are assumed to be multiples of BLOCK_SIZE
@@ -45,12 +66,14 @@ void MatMultGPU(const Matrix A, const Matrix B, Matrix C)
 
 	d_A.width = d_A.stride = A.width;
 	d_A.height = A.height;
-	size_t size = A.width * A.height * sizeof(float);
+	//size_t size = A.width * A.height * sizeof(float);
+	size_t size = ((A.width * A.height - A.width)/2) * sizeof(float);
 	cudaMalloc((void**)&d_A.els, size);
 	cudaMallocReturnStatus = cudaMalloc((void**)&d_A.els, size);
 	if (cudaMallocReturnStatus == cudaErrorMemoryAllocation) {
 		printf("Couldn't allocate A on CPU, exiting\n"); exit(0);
 	}
+  TruncateMatrix(A);
 	cudaMemcpy(d_A.els, A.els, size, cudaMemcpyHostToDevice);
 
 	d_B.width = d_B.stride = B.width;
