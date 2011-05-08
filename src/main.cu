@@ -17,8 +17,10 @@ void Usage(int retVal, char *argv0)
 int GetInputs(int argc, char *argv[], Matrix *a, Matrix *b, float *alpha, char
 		*which, int *useOldFormat)
 {
+	*useOldFormat = 0;
+
 	if (argc < 6)
-		RET_ERROR("must have 5 cmd line args");
+		RET_ERROR("must have at least 5 cmd line args");
 
 	if (argc > 6 && strncmp(argv[6], "o", 2) == 0)
 		*useOldFormat = 1;

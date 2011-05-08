@@ -229,6 +229,36 @@ sequential: bin/my_seq $(INPUTS)
 sequentialsmall: bin/my_seq $(INPUTS)
 	./bin/my_seq inputs/test_cublas_A_unit_low.txt inputs/test_cublas_B.txt 1.0 S obj/test_cublas_A_unit_low.txt.out o
 
+seq1: bin/my_seq $(INPUTS)
+	bin/my_seq \
+		inputs/test_input_1a.txt \
+		inputs/test_input_1b.txt \
+		1.0 C \
+		obj/test_input_1.txt.seq.out
+	bin/diff_coo_matrices.py \
+		obj/test_input_1.txt.seq.out \
+		inputs/test_input_1_golden.txt 2>/dev/null
+
+seq2: bin/my_seq $(INPUTS)
+	bin/my_seq \
+		inputs/test_input_2a.txt \
+		inputs/test_input_2b.txt \
+		1.0 C \
+		obj/test_input_2.txt.seq.out
+	bin/diff_coo_matrices.py \
+		obj/test_input_2.txt.seq.out \
+		inputs/test_input_2_golden.txt 2>/dev/null
+
+seq3: bin/my_seq $(INPUTS)
+	bin/my_seq \
+		inputs/test_input_3a.txt \
+		inputs/test_input_3b.txt \
+		1.0 C \
+		obj/test_input_3.txt.seq.out
+	bin/diff_coo_matrices.py \
+		obj/test_input_3.txt.seq.out \
+		inputs/test_input_3_golden.txt 2>/dev/null
+
 bin/my_seq: obj/my_seq.o obj/mat_mult_seq.o obj/matrix.o | $(OBJ_DIR)
 	$(NVCC) $(FLAGS) $(LIBS) -o $@ obj/my_seq.o obj/mat_mult_seq.o obj/matrix.o
 
