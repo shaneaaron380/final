@@ -1,4 +1,5 @@
 #include "mat_mult_cublas.h"
+#include "sys/time.h"
 
 /*******************************************************************************
  * 
@@ -14,6 +15,10 @@
 int MatMultCublas(const Matrix A, Matrix B, const float alpha)
 {
 	int r;
+	struct timeval timerValues;
+	double start_time, end_time;
+	timerclear(&timerValues);	
+	
 	if (cublasInit() != CUBLAS_STATUS_SUCCESS)
 		RET_ERROR("cublasInit failed");
 
@@ -37,6 +42,14 @@ int MatMultCublas(const Matrix A, Matrix B, const float alpha)
 		RET_ERROR("failed to allocate space for B");
 	}
 
+	//Get start time
+	if (gettimeofday(&timerValues, NULL))
+		printf("WARNING: Counldn't get start time of day\n");
+	
+	//if (timerisset(&timerValues)) 
+	start_time = (double) timerValues.tv_sec	+ (double) (timerValues.tv_usec)/1000000;
+	//printf("Start secs: %ld, Start usecs: %ld, Time: %f\n", timerValues.tv_sec, timerValues.tv_usec, start_time);
+	
 	r = cudaMemcpy(d_A.els, A.els, A.width*A.height*sizeof(float),
 			cudaMemcpyHostToDevice);
 	if (r != cudaSuccess)
@@ -63,6 +76,14 @@ int MatMultCublas(const Matrix A, Matrix B, const float alpha)
 			cudaMemcpyDeviceToHost);
 	if (r != cudaSuccess)
 		RET_ERROR("could not copy data from d_B");
+	
+	//Get end time
+	if (gettimeofday(&timerValues, NULL))
+		printf("WARNING: Counldn't get end time of day\n");
+	
+	//if (timerisset(&timerValues)) 
+	end_time = (double) timerValues.tv_sec	+ (double) (timerValues.tv_usec)/1000000;
+	printf("End secs: %ld, End usecs: %ld, Total Time: %f\n", timerValues.tv_sec, timerValues.tv_usec, end_time-start_time);
 
 	int e = cublasGetError();
 	if (e == CUBLAS_STATUS_NOT_INITIALIZED) {

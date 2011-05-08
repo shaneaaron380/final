@@ -98,6 +98,8 @@ void MatMultGPU(const Matrix A, const Matrix B, Matrix C, const float alpha)
 		printf("ERROR: Couldn't allocate Matrix C on GPU, exiting\n"); exit(0);
 	}
 
+  int threadsPerBlock = 512;
+  int blocksPerGrid = (n+threadsPerBlock-1)/threadsPerBlock;
 	
 	//Get start time
 	if (gettimeofday(&timerValues, NULL))
@@ -105,19 +107,12 @@ void MatMultGPU(const Matrix A, const Matrix B, Matrix C, const float alpha)
 	
 	//if (timerisset(&timerValues)) 
 	start_time = (double) timerValues.tv_sec	+ (double) (timerValues.tv_usec)/1000000;
-	printf("Start secs: %ld, Start usecs: %ld, Time: %f\n", timerValues.tv_sec, timerValues.tv_usec, start_time);
+	//printf("Start secs: %ld, Start usecs: %ld, Time: %f\n", timerValues.tv_sec, timerValues.tv_usec, start_time);
 	
 	cudaMemcpy(d_A.els, A.els, size, cudaMemcpyHostToDevice);
 	cudaMemcpy(d_B.els, B.els, size, cudaMemcpyHostToDevice);
 
-	//dim3 dimBlock(BLOCK_SIZE, BLOCK_SIZE);
-	//dim3 dimBlock(A.width, A.width);
-	//dim3 dimGrid(B.width / dimBlock.x, A.height / dimBlock.y);
-  //printf("dimBlock.x = %d, dimBlock.y = %d\n", dimBlock.x, dimBlock.y);
-  int threadsPerBlock = 512;
-  int blocksPerGrid = (n+threadsPerBlock-1)/threadsPerBlock;
-  printf("grids=%d, threads=%d\n", blocksPerGrid, threadsPerBlock);
-	//MatMultKernel<<<dimGrid, dimBlock>>>(d_A, d_B, d_C, A.width);
+  //printf("grids=%d, threads=%d\n", blocksPerGrid, threadsPerBlock);
 	MatMultKernel<<<blocksPerGrid, threadsPerBlock>>>(d_A, d_B, d_C, alpha, n);
   
   cudaPrintfDisplay(stdout,true);
