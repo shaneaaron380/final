@@ -1,5 +1,6 @@
 
 #include "mat_mult_seq.h"
+#include "sys/time.h"
 
 void Usage(int retVal, char *argv0)
 {
@@ -48,6 +49,9 @@ int main(int argc, char *argv[])
 	float alpha;
 	char which;
 	int useOldFormat;
+	struct timeval timerValues;
+	double start_time, end_time;
+	timerclear(&timerValues);	
 
 	if (GetInputs(argc, argv, &A, &B, &alpha, &which, &useOldFormat) != SUCCESS)
 		Usage(1, argv[0]);
@@ -56,10 +60,26 @@ int main(int argc, char *argv[])
 	X.height = A.height;
 	if (! (X.els = (float*) malloc(X.width * X.height * sizeof(X.els[0]))))
 		RET_ERROR("could not allocate memory for elements from test seq main");
+	
+  //Get start time
+	if (gettimeofday(&timerValues, NULL))
+		printf("WARNING: Counldn't get start time of day\n");
+	
+	//if (timerisset(&timerValues)) 
+	start_time = (double) timerValues.tv_sec	+ (double) (timerValues.tv_usec)/1000000;
+	//printf("Start secs: %ld, Start usecs: %ld, Time: %f\n", timerValues.tv_sec, timerValues.tv_usec, start_time);
 
 	MatMultSeq(&A, &B, &X, alpha); 
 
-	if (useOldFormat) {
+	//Get end time
+	if (gettimeofday(&timerValues, NULL))
+		printf("WARNING: Counldn't get end time of day\n");
+	
+	//if (timerisset(&timerValues)) 
+	end_time = (double) timerValues.tv_sec	+ (double) (timerValues.tv_usec)/1000000;
+	printf("End secs: %ld, End usecs: %ld, Total Time: %f\n", timerValues.tv_sec, timerValues.tv_usec, end_time-start_time);
+	
+  if (useOldFormat) {
 		if (MatrixToFile(argv[5], &X, MATRIX_FILE_NO_TRANSPOSE) != SUCCESS)
 			RET_ERROR("could not write result matrix to %s", argv[5]);
 	} else {
@@ -70,60 +90,6 @@ int main(int argc, char *argv[])
 	free(A.els);
 	free(B.els);
 	free(X.els);
-
-	//double ** A = (double **) malloc(n*sizeof (double *) );
-	//double ** B = (double **) malloc(n*sizeof (double *) );
-	//double ** X = (double **) malloc(n*sizeof (double *) );
-	//
-	//for (i = 0; i < n; i++ )
-	//  A[i] = (double *) malloc(n*sizeof(double));
-
-	//for (i = 0; i < n; i++ )
-	//  B[i] = (double *) malloc(n*sizeof(double));
-	//
-	//for (i = 0; i < n; i++ )
-	//  X[i] = (double *) malloc(n*sizeof(double));
-
-	//printf("A=\n");
-	//for (i = 0; i < n; i++) {
-	//  for (j = 0; j < n; j++) {
-	//    if (i == j)
-	//      A[i][j] = 1;
-	//    if (i > j)
-	//      A[i][j] = 0;
-	//    if (j < i)
-	//      A[i][j] = 5;
-	//    printf("%f ", A[i][j]);
-	//  }
-	//  printf("\n");
-	//}
-	//printf("\nB=\n");
-	//for (i = 0; i < n; i++) {
-	//  for (j = 0; j < n; j++) {
-	//    B[i][j] = 3;
-	//    printf("%f ", B[i][j]);
-	//  }
-	//  printf("\n");
-	//}
-	//printf("\n");
-
-
-	//printf("\nX=\n");
-	//for (i = 0; i < n; i++) {
-	//  for (j = 0; j < n; j++) {
-	//    printf("%f ", X[i][j]);
-	//  }
-	//  printf("\n");
-	//}
-
-	//for (i = 0; i < n; i++) {
-	//  free(A[i]);
-	//  free(B[i]);
-	//  free(X[i]);
-	//}
-	//free(A);
-	//free(B);
-	//free(X);
-
-	return 0;
+	
+  return 0;
 }
