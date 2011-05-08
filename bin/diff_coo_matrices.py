@@ -1,7 +1,15 @@
 #! /usr/bin/env python
 
 import sys,os,array
-from math import sqrt,isnan
+from math import sqrt
+
+def isnan(num):
+	return num != num
+
+try:
+	from math import isnan
+except ImportError:
+	pass
 
 def n_zeroes(how_many):
 	"""
