@@ -7,12 +7,14 @@
 __global__ void MatMultKernel(const Matrix A, const Matrix B, Matrix C, const float alpha, int n)
 {
   int l = 0;
+  //int j = (gridDim.x-1)*512 + threadIdx.x;
   int j = blockIdx.x * blockDim.x + threadIdx.x;
   //int j = blockIdx.y * blockDim.y + threadIdx.y;
   float S;
 
   if (j < n) {
     //cuPrintf("%d,%d : %d,%d : %d,%d\n", blockIdx.x, blockIdx.y, blockDim.x, blockDim.y, threadIdx.x, threadIdx.y);
+    //if ( (j % 20) == 0) cuPrintf("%d,%d,%d\n", j, gridDim.x, threadIdx.x);
     for (int i = 0; i < n; i++) {
       S = alpha*B.els[i*n+j]; //S = B[i][j];
       //cuPrintf("i=%d,j=%d, S=%f\n", i, j, S);
@@ -149,8 +151,8 @@ void MatMultGPU(const Matrix A, const Matrix B, Matrix C, const float alpha)
 	cudaMemcpy(d_B.els, B.els, size, cudaMemcpyHostToDevice);
 
   //printf("grids=%d, threads=%d\n", blocksPerGrid, threadsPerBlock);
-	//MatMultKernel<<<blocksPerGrid, threadsPerBlock>>>(d_A, d_B, d_C, alpha, n);
-	MatMultKernelShared<<<blocksPerGrid, threadsPerBlock, sizeof(float)*(n-1)>>>(d_A, d_B, d_C, alpha, n);
+	MatMultKernel<<<blocksPerGrid, threadsPerBlock>>>(d_A, d_B, d_C, alpha, n);
+	//MatMultKernelShared<<<blocksPerGrid, threadsPerBlock, sizeof(float)*(n-1)>>>(d_A, d_B, d_C, alpha, n);
 	//MatMultKernel<<<1, 3, sizeof(float)*(n-1)>>>(d_A, d_B, d_C, alpha, n);
   
 	cudaMemcpy(C.els, d_C.els, size, cudaMemcpyDeviceToHost);
