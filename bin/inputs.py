@@ -218,15 +218,15 @@ def make_test_cublas_B():
 	f.close()
 
 def make_test_input_1a():
-	download('http://www.cs.utexas.edu/users/akanksha/cs380p/project/input_100_A.txt',
+	download('http://www.cs.utexas.edu/users/akanksha/cs380p/project/input_500_A.txt',
 			this_func_input_name())
 
 def make_test_input_1b():
-	download('http://www.cs.utexas.edu/users/akanksha/cs380p/project/input_100_B.txt',
+	download('http://www.cs.utexas.edu/users/akanksha/cs380p/project/input_500_B.txt',
 			this_func_input_name())
 
 def make_test_input_1_golden():
-	download('http://www.cs.utexas.edu/users/akanksha/cs380p/project/output_100.txt',
+	download('http://www.cs.utexas.edu/users/akanksha/cs380p/project/output_500.txt',
 			this_func_input_name())
 
 def make_test_input_2a():
