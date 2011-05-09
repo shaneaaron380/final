@@ -12,5 +12,6 @@ for i in {1..3}; do
 		else
 			echo "*** no $implementation output for input $i"
 		fi
+		echo ""
 	done
 done

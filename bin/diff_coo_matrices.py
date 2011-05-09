@@ -28,7 +28,7 @@ def err(a, b):
 	return (a - b) / a
 
 def close_enough(a, b):
-	return err(a, b) < .01
+	return err(a, b) < .005
 
 def coo_to_array(filename, height = None, width = None):
 	f = open(filename)
