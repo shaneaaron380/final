@@ -21,6 +21,15 @@ def n_zeroes(how_many):
 		yield 0.0
 		i += 1
 
+def sign(a):
+	return '%.3e' % float(a)
+
+def err(a, b):
+	return (a - b) / a
+
+def close_enough(a, b):
+	return err(a, b) < .01
+
 def coo_to_array(filename, height = None, width = None):
 	f = open(filename)
 	l = f.readline()
@@ -63,9 +72,10 @@ def main():
 			if isnan(a[i*l + j]) and isnan(b[i*l + j]):
 				continue
 
-			if round(a[i*l + j], 2) != round(b[i*l + j], 2):
+			#if round(a[i*l + j], 2) != round(b[i*l + j], 2):
+			if not close_enough(a[i*l + j], b[i*l + j]):
 				sys.stderr.write(
-					'ERROR: element (%d, %d) doesn\'t match: %f %f\n' % \
+					'ERROR: element (%d, %d) doesn\'t match: %s %s\n' % \
 							(i, j, a[i*l + j], b[i*l + j]))
 				errors += 1
 
