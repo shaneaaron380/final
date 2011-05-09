@@ -83,7 +83,8 @@ int MatMultCublas(const Matrix A, Matrix B, const float alpha)
 	
 	//if (timerisset(&timerValues)) 
 	end_time = (double) timerValues.tv_sec	+ (double) (timerValues.tv_usec)/1000000;
-	printf("End secs: %ld, End usecs: %ld, Total Time: %f\n", timerValues.tv_sec, timerValues.tv_usec, end_time-start_time);
+	//printf("End secs: %ld, End usecs: %ld, Total Time: %f\n", timerValues.tv_sec, timerValues.tv_usec, end_time-start_time);
+	printf("Total Time: %f\n", end_time-start_time);
 
 	int e = cublasGetError();
 	if (e == CUBLAS_STATUS_NOT_INITIALIZED) {
