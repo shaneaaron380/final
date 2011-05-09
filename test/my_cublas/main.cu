@@ -22,7 +22,7 @@ int GetInputs(int argc, char *argv[], Matrix *a, Matrix *b, float *alpha, char
 	if (argc > 6 && strncmp(argv[6], "o", 2) == 0)
 		*useOldFormat = 1;
 
-	if (useOldFormat) {
+	if (*useOldFormat) {
 		if (MatrixFromFile(argv[1], a, MATRIX_FILE_TRANSPOSE) != SUCCESS)
 			RET_ERROR("could not read matrix A");
 
