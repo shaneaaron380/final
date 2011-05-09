@@ -35,7 +35,8 @@ __global__ void MatMultKernelShared(const Matrix A, const Matrix B, Matrix C, co
   int l = 0;
   int j = blockIdx.x * blockDim.x + threadIdx.x;
   //int j = blockIdx.y * blockDim.y + threadIdx.y;
-  float S;
+  int m = n%512 ? n%512+1 : n%512;
+	float S;
 
   extern __shared__ float As[];
  
@@ -44,10 +45,14 @@ __global__ void MatMultKernelShared(const Matrix A, const Matrix B, Matrix C, co
     for (int i = 0; i < n; i++) {
       
       __syncthreads();
-      if (j < i) { 
-        As[j] = A.els[l+j];
-        //cuPrintf("j=%d, i=%d,l+j=%d, As[l+j]=%f\n", j, i,l+j, As[j]);
-      }
+			for (int o = 0; o < m; o++) {
+      	int p = o*512+threadIdx.x;
+				if (p < i) { 
+        	As[p] = A.els[l+p];
+        	//cuPrintf("j=%d, i=%d,l+j=%d, As[l+j]=%f\n", j, i,l+j, As[j]);
+      	}
+				else break;
+			}
       __syncthreads();
       
       S = alpha*B.els[i*n+j]; //S = B[i][j];
@@ -56,9 +61,9 @@ __global__ void MatMultKernelShared(const Matrix A, const Matrix B, Matrix C, co
         //S -= A.els[i*n+k] * C.els[k*n+j]; //S -= A[i][k] * C[k][j];
         //S -= A.els[l] * C.els[k*n+j]; //S -= A[i][k] * C[k][j];
         S -= As[k] * C.els[k*n+j]; //S -= A[i][k] * C[k][j];
-        l++;
         //cuPrintf("i=%d,j=%d,k=%d, S=%f, A=%f, C=%f\n", i, j, k, S, As[k], C.els[k*n+j]);
       }
+      l += i;
       C.els[i*n+j] = S; //C[i][j] = S;
     }
   }
