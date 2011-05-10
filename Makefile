@@ -118,7 +118,7 @@ simple: $(TARGET) $(INPUTS)
 		inputs/simple_A.txt \
 		inputs/simple_B.txt 1.0 G \
 		obj/simple_A.txt.gpu.out
-	diff inputs/simple_A_golden.txt obj/simple_A.txt.gpu.out
+	bin/diff_coo_matrices.py inputs/simple_A_golden.txt obj/simple_A.txt.gpu.out
 
 ################################################################################
 # libraries

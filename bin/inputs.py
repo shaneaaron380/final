@@ -270,7 +270,7 @@ def make_simple_A_golden():
 	f = open(this_func_input_name(), 'w')
 	f.write('16 16\n')
 	r = range(16)
-	[ f.write('%d %d %.1f\n' % (i, j, 1.0)) for i in r for j in r ]
+	[ f.write('%d %d %.1f\n' % (i, j, float(int(1)))) for i in r for j in r ]
 
 
 def Usage(ret_val = 0):
