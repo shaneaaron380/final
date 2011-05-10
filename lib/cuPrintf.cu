@@ -273,18 +273,18 @@ __device__ static char *cuPrintfStrncpy(char *dest, const char *src, int n, char
 //  the display can distinguish between float and double), and the
 //  pointer to the end of the entry is returned.
 //
-__device__ static char *copyArg(char *ptr, const char *arg, char *end)
-{
-    // Initialisation check
-    if(!ptr || !arg)
-        return NULL;
+/*__device__ static char *copyArg(char *ptr, const char *arg, char *end)*/
+/*{*/
+/*    // Initialisation check*/
+/*    if(!ptr || !arg)*/
+/*        return NULL;*/
 
-    // strncpy does all our work. We just terminate.
-    if((ptr = cuPrintfStrncpy(ptr, arg, CUPRINTF_MAX_LEN, end)) != NULL)
-        *ptr = 0;
+/*    // strncpy does all our work. We just terminate.*/
+/*    if((ptr = cuPrintfStrncpy(ptr, arg, CUPRINTF_MAX_LEN, end)) != NULL)*/
+/*        *ptr = 0;*/
 
-    return ptr;
-}
+/*    return ptr;*/
+/*}*/
 
 template <typename T>
 __device__ static char *copyArg(char *ptr, T &arg, char *end)

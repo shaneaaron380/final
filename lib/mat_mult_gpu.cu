@@ -1,8 +1,8 @@
 
 #include "mat_mult_gpu.h"
-#include "cuPrintf.cu"
 #include "sys/time.h"
 //#include "cuda.h"
+#include "cuPrintf.cuh"
 
 __global__ void MatMultKernel(const Matrix A, const Matrix B, Matrix C, const float alpha, int n)
 {
@@ -70,23 +70,24 @@ __global__ void MatMultKernelShared(const Matrix A, const Matrix B, Matrix C, co
 
 }
 
-void TruncateMatrix(Matrix A) {
-
-  int k = 0;
-  int n = A.width;
-  //int size = (n*n-n)/2;
-
-  for (int i = 0; i < n; i++) {
-    for (int j = 0; j < n; j++) {
-      if (i == j) continue;
-      if (j < i) {
-        //assert(k<size);
-        A.els[k] = A.els[i*n+j];
-        k++;
-      }
-    }
-  }
-}
+// this is now in matrix.h since it's shared
+//void TruncateMatrix(Matrix A) {
+//
+//  int k = 0;
+//  int n = A.width;
+//  //int size = (n*n-n)/2;
+//
+//  for (int i = 0; i < n; i++) {
+//    for (int j = 0; j < n; j++) {
+//      if (i == j) continue;
+//      if (j < i) {
+//        //assert(k<size);
+//        A.els[k] = A.els[i*n+j];
+//        k++;
+//      }
+//    }
+//  }
+//}
 
 // matrix dimensions are assumed to be multiples of BLOCK_SIZE
 void MatMultGPU(const Matrix A, const Matrix B, Matrix C, const float alpha)

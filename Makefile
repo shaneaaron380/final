@@ -37,10 +37,10 @@ inputs: $(INPUTS)
 # main application
 ################################################################################
 
-$(TARGET): obj/main.o obj/matrix.o obj/mat_mult_gpu.o obj/mat_mult_cublas.o obj/mat_mult_seq.o
-	$(NVCC) $(FLAGS) $(LIBS) -o $@ obj/main.o obj/matrix.o obj/mat_mult_gpu.o obj/mat_mult_cublas.o obj/mat_mult_seq.o
+$(TARGET): obj/main.o obj/matrix.o obj/mat_mult_gpu.o obj/mat_mult_cublas.o obj/mat_mult_seq.o obj/mat_mult_shared.o obj/cuPrintf.o
+	$(NVCC) $(FLAGS) $(LIBS) -o $@ obj/main.o obj/matrix.o obj/mat_mult_gpu.o obj/mat_mult_cublas.o obj/mat_mult_seq.o obj/mat_mult_shared.o obj/cuPrintf.o
 
-obj/main.o: src/main.cu inc/matrix.h inc/mat_mult_gpu.h inc/mat_mult_cublas.h inc/mat_mult_seq.h | $(OBJ_DIR)
+obj/main.o: src/main.cu inc/matrix.h inc/mat_mult_gpu.h inc/mat_mult_cublas.h inc/mat_mult_seq.h inc/mat_mult_shared.h inc/cuPrintf.cuh | $(OBJ_DIR)
 	$(NVCC) $(FLAGS) -c -o $@ $<
 
 $(OBJ_DIR):
@@ -118,6 +118,7 @@ simple: $(TARGET) $(INPUTS)
 		inputs/simple_A.txt \
 		inputs/simple_B.txt 1.0 G \
 		obj/simple_A.txt.gpu.out
+	diff inputs/simple_A_golden.txt obj/simple_A.txt.gpu.out
 
 ################################################################################
 # libraries
@@ -136,6 +137,12 @@ obj/mat_mult_seq.o: lib/mat_mult_seq.cu inc/mat_mult_seq.h inc/matrix.h | $(OBJ_
 	$(NVCC) $(FLAGS) $(LIBS) -c -o $@ $<
 
 obj/mat_mult_gpu.o: lib/mat_mult_gpu.cu inc/mat_mult_gpu.h inc/matrix.h | $(OBJ_DIR)
+	$(NVCC) $(FLAGS) $(LIBS) -c -o $@ $<
+
+obj/mat_mult_shared.o: lib/mat_mult_shared.cu inc/mat_mult_shared.h inc/matrix.h | $(OBJ_DIR)
+	$(NVCC) $(FLAGS) $(LIBS) -c -o $@ $<
+
+obj/cuPrintf.o: lib/cuPrintf.cu inc/cuPrintf.cuh | $(OBJ_DIR)
 	$(NVCC) $(FLAGS) $(LIBS) -c -o $@ $<
 
 ################################################################################

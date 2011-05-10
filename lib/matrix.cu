@@ -121,3 +121,21 @@ int MatrixToCOOFile(char const* const filename, Matrix const* const m, int trans
 
 	return SUCCESS;
 }
+
+void TruncateMatrix(Matrix A)
+{
+
+  int k = 0;
+  int n = A.width;
+
+  for (int i = 0; i < n; i++) {
+    for (int j = 0; j < n; j++) {
+      if (i == j) continue;
+      if (j < i) {
+        A.els[k] = A.els[i*n+j];
+        k++;
+      }
+    }
+  }
+}
+

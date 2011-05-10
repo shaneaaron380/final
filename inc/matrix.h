@@ -19,4 +19,6 @@ int MatrixToFile(char const* const filename, Matrix const* const m, int trans);
 int MatrixFromCOOFile(char const* const filename, Matrix *m, int trans);
 int MatrixToCOOFile(char const* const filename, Matrix const* const m, int trans);
 
+void TruncateMatrix(Matrix A);
+
 #endif

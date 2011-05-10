@@ -4,6 +4,7 @@
 #include "mat_mult_cublas.h"
 #include "mat_mult_gpu.h"
 #include "mat_mult_seq.h"
+#include "mat_mult_shared.h"
 
 void Usage(int retVal, char *argv0)
 {
@@ -78,7 +79,8 @@ int main(int argc, char *argv[])
 
 		if (which == 'G') {
 			printf("Using GPU implementation\n");
-			MatMultGPU(A, B, C, alpha);
+			/*MatMultGPU(A, B, C, alpha);*/
+			MatMultShared(A, B, C, alpha);
 		} else {
 			printf("Using sequential implementation\n");
 			MatMultSeq(&A, &B, &C, alpha); 
