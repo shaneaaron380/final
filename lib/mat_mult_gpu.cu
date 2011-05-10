@@ -4,6 +4,9 @@
 //#include "cuda.h"
 #include "cuPrintf.cu"
 
+#define A_SM_CACHE_SZ 512 
+#define THREADS_PER_BLOCK 512 
+
 __global__ void MatMultKernel(const Matrix A, const Matrix B, Matrix C, const float alpha, int n)
 {
   int l = 0;
@@ -29,46 +32,79 @@ __global__ void MatMultKernel(const Matrix A, const Matrix B, Matrix C, const fl
   }
 }
 
-
-__global__ void MatMultKernelShared(const Matrix A, const Matrix B, Matrix C, const float alpha, const int n)
+__global__ void MatMultKernelShared(const Matrix A, const Matrix B, Matrix C, const float alpha, const int N)
 {
   int l = 0;
   int j = blockIdx.x * blockDim.x + threadIdx.x;
   //int j = blockIdx.y * blockDim.y + threadIdx.y;
-  int m = n%512 ? n%512+1 : n%512;
+  //int m = N%THREADS_PER_BLOCK ? N/THREADS_PER_BLOCK+1 : N/THREADS_PER_BLOCK;
+	int M = N > A_SM_CACHE_SZ ? A_SM_CACHE_SZ : N;
 	float S;
 
-  extern __shared__ float As[];
+  __shared__ float As[A_SM_CACHE_SZ];
  
-  if (j < n) {
+  if (j < N) {
     //cuPrintf("%d,%d : %d,%d : %d,%d\n", blockIdx.x, blockIdx.y, blockDim.x, blockDim.y, threadIdx.x, threadIdx.y);
-    for (int i = 0; i < n; i++) {
-      
+    for (int i = 0; i < N; i++) {
+     
+      S = alpha*B.els[i*N+j]; //S = B[i][j];
       __syncthreads();
-			for (int o = 0; o < m; o++) {
-      	int p = o*512+threadIdx.x;
-				if (p < i) { 
-        	As[p] = A.els[l+p];
-        	//cuPrintf("j=%d, i=%d,l+j=%d, As[l+j]=%f\n", j, i,l+j, As[j]);
-      	}
-				else break;
-			}
+      if (threadIdx.x < i) As[threadIdx.x] = A.els[l+threadIdx.x];
+      //As[THREADS_PER_BLOCK+threadIdx.x] = A.els[l+THREADS_PER_BLOCK+threadIdx.x];
+      //if (j == 0) cuPrintf("j=%d, i=%d, As[p]=%f\n", j, i, As[p]);
       __syncthreads();
-      
-      S = alpha*B.els[i*n+j]; //S = B[i][j];
       //cuPrintf("i=%d,j=%d, S=%f\n", i, j, S);
       for (int k = 0; k < i; k++) {
-        //S -= A.els[i*n+k] * C.els[k*n+j]; //S -= A[i][k] * C[k][j];
-        //S -= A.els[l] * C.els[k*n+j]; //S -= A[i][k] * C[k][j];
-        S -= As[k] * C.els[k*n+j]; //S -= A[i][k] * C[k][j];
-        //cuPrintf("i=%d,j=%d,k=%d, S=%f, A=%f, C=%f\n", i, j, k, S, As[k], C.els[k*n+j]);
+        //S -= A.els[i*N+k] * C.els[k*N+j]; //S -= A[i][k] * C[k][j];
+        //S -= A.els[l] * C.els[k*N+j]; //S -= A[i][k] * C[k][j];
+				S -= As[k] * C.els[k*N+j]; //S -= A[i][k] * C[k][j];
+        //cuPrintf("i=%d,j=%d,k=%d, S=%f, A=%f, C=%f\n", i, j, k, S, As[k], C.els[k*N+j]);
       }
-      l += i;
-      C.els[i*n+j] = S; //C[i][j] = S;
+     	l += i;
+      C.els[i*N+j] = S; //C[i][j] = S;
     }
   }
-
 }
+
+//__global__ void MatMultKernelShared(const Matrix A, const Matrix B, Matrix C, const float alpha, const int n)
+//{
+//  int l = 0;
+//  int j = blockIdx.x * blockDim.x + threadIdx.x;
+//  //int j = blockIdx.y * blockDim.y + threadIdx.y;
+//  int m = n%512 ? n%512+1 : n%512;
+//	float S;
+//
+//  extern __shared__ float As[];
+// 
+//  if (j < n) {
+//    //cuPrintf("%d,%d : %d,%d : %d,%d\n", blockIdx.x, blockIdx.y, blockDim.x, blockDim.y, threadIdx.x, threadIdx.y);
+//    for (int i = 0; i < n; i++) {
+//      
+//      __syncthreads();
+//			for (int o = 0; o < m; o++) {
+//      	int p = o*512+threadIdx.x;
+//				if (p < i) { 
+//        	As[p] = A.els[l+p];
+//        	//cuPrintf("j=%d, i=%d,l+j=%d, As[l+j]=%f\n", j, i,l+j, As[j]);
+//      	}
+//				else break;
+//			}
+//      __syncthreads();
+//      
+//      S = alpha*B.els[i*n+j]; //S = B[i][j];
+//      //cuPrintf("i=%d,j=%d, S=%f\n", i, j, S);
+//      for (int k = 0; k < i; k++) {
+//        //S -= A.els[i*n+k] * C.els[k*n+j]; //S -= A[i][k] * C[k][j];
+//        //S -= A.els[l] * C.els[k*n+j]; //S -= A[i][k] * C[k][j];
+//        S -= As[k] * C.els[k*n+j]; //S -= A[i][k] * C[k][j];
+//        //cuPrintf("i=%d,j=%d,k=%d, S=%f, A=%f, C=%f\n", i, j, k, S, As[k], C.els[k*n+j]);
+//      }
+//      l += i;
+//      C.els[i*n+j] = S; //C[i][j] = S;
+//    }
+//  }
+//
+//}
 
 // this is now in matrix.h since it's shared
 //void TruncateMatrix(Matrix A) {
@@ -108,6 +144,7 @@ void MatMultGPU(const Matrix A, const Matrix B, Matrix C, const float alpha)
 	cudaError_t cudaMallocReturnStatus;
 	struct timeval timerValues;
 	double start_time, end_time;
+	double before_kernel, after_kernel;
 	timerclear(&timerValues);	
 
   cudaPrintfInit();
@@ -155,13 +192,25 @@ void MatMultGPU(const Matrix A, const Matrix B, Matrix C, const float alpha)
 	
 	cudaMemcpy(d_A.els, A.els, asize, cudaMemcpyHostToDevice);
 	cudaMemcpy(d_B.els, B.els, size, cudaMemcpyHostToDevice);
-
+	
+	if (gettimeofday(&timerValues, NULL))
+		printf("WARNING: Counldn't get before kernel time of day\n");
+	
+	before_kernel = (double) timerValues.tv_sec	+ (double) (timerValues.tv_usec)/1000000;
+	
   //printf("grids=%d, threads=%d\n", blocksPerGrid, threadsPerBlock);
 	MatMultKernel<<<blocksPerGrid, threadsPerBlock>>>(d_A, d_B, d_C, alpha, n);
 	//MatMultKernelShared<<<blocksPerGrid, threadsPerBlock, sizeof(float)*(n-1)>>>(d_A, d_B, d_C, alpha, n);
 	//MatMultKernel<<<1, 3, sizeof(float)*(n-1)>>>(d_A, d_B, d_C, alpha, n);
-  
+	cudaThreadSynchronize();	
+	
+	if (gettimeofday(&timerValues, NULL))
+		printf("WARNING: Counldn't get after kernel time of day\n");
+	
+	after_kernel = (double) timerValues.tv_sec	+ (double) (timerValues.tv_usec)/1000000;
+	
 	cudaMemcpy(C.els, d_C.els, size, cudaMemcpyDeviceToHost);
+  
 	//Get end time
 	if (gettimeofday(&timerValues, NULL))
 		printf("WARNING: Counldn't get end time of day\n");
@@ -170,6 +219,8 @@ void MatMultGPU(const Matrix A, const Matrix B, Matrix C, const float alpha)
 	end_time = (double) timerValues.tv_sec	+ (double) (timerValues.tv_usec)/1000000;
 	//printf("End secs: %ld, End usecs: %ld, Total Time: %f\n", timerValues.tv_sec, timerValues.tv_usec, end_time-start_time);
 	printf("Total Time: %f\n", end_time-start_time);
+	printf("Kernel Time: %f\n", after_kernel-before_kernel);
+	printf("Transfer Time: %f\n", (end_time-after_kernel)+(before_kernel-start_time));
   
   cudaPrintfDisplay(stdout,true);
   cudaPrintfEnd();
