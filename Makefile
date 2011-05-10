@@ -37,10 +37,10 @@ inputs: $(INPUTS)
 # main application
 ################################################################################
 
-$(TARGET): obj/main.o obj/matrix.o obj/mat_mult_gpu.o obj/mat_mult_cublas.o obj/mat_mult_seq.o obj/mat_mult_shared.o obj/cuPrintf.o
-	$(NVCC) $(FLAGS) $(LIBS) -o $@ obj/main.o obj/matrix.o obj/mat_mult_gpu.o obj/mat_mult_cublas.o obj/mat_mult_seq.o obj/mat_mult_shared.o obj/cuPrintf.o
+$(TARGET): obj/main.o obj/matrix.o obj/mat_mult_gpu.o obj/mat_mult_cublas.o obj/mat_mult_seq.o obj/mat_mult_shared.o
+	$(NVCC) $(FLAGS) $(LIBS) -o $@ obj/main.o obj/matrix.o obj/mat_mult_gpu.o obj/mat_mult_cublas.o obj/mat_mult_seq.o obj/mat_mult_shared.o
 
-obj/main.o: src/main.cu inc/matrix.h inc/mat_mult_gpu.h inc/mat_mult_cublas.h inc/mat_mult_seq.h inc/mat_mult_shared.h inc/cuPrintf.cuh | $(OBJ_DIR)
+obj/main.o: src/main.cu inc/matrix.h inc/mat_mult_gpu.h inc/mat_mult_cublas.h inc/mat_mult_seq.h inc/mat_mult_shared.h | $(OBJ_DIR)
 	$(NVCC) $(FLAGS) -c -o $@ $<
 
 $(OBJ_DIR):

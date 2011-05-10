@@ -1,12 +1,16 @@
 #include "mat_mult_shared.h"
 #include "sys/time.h"
-#include "cuPrintf.cuh"
+/*#include "cuPrintf.cuh"*/
+
+#define COLS_IN_SHMEM 4
 
 __global__ void MatMultKernelS(const Matrix A, const Matrix B, Matrix C, const float alpha, int n)
 {
 	int l = 0;
 	int j = blockIdx.x * blockDim.x + threadIdx.x;
 	float S;
+
+	/*cuPrintf("123");*/
 
 	if (j < n) {
 		for (int i = 0; i < n; i++) {
@@ -30,7 +34,7 @@ int MatMultShared(const Matrix A, const Matrix B, Matrix C, const float alpha)
 	double start_time, end_time;
 	timerclear(&timerValues);	
 
-	cudaPrintfInit();
+	/*cudaPrintfInit();*/
 
 	d_A.width = d_A.stride = A.width;
 	d_A.height = A.height;
@@ -60,8 +64,10 @@ int MatMultShared(const Matrix A, const Matrix B, Matrix C, const float alpha)
 
 	start_time = (double) timerValues.tv_sec	+ (double) (timerValues.tv_usec)/1000000;
 
-	cudaMemcpy(d_A.els, A.els, asize, cudaMemcpyHostToDevice);
-	cudaMemcpy(d_B.els, B.els, size, cudaMemcpyHostToDevice);
+	if (cudaMemcpy(d_A.els, A.els, asize, cudaMemcpyHostToDevice) != cudaSuccess)
+		RET_ERROR("could not copy A matrix to device");
+	if (cudaMemcpy(d_B.els, B.els, size, cudaMemcpyHostToDevice) != cudaSuccess)
+		RET_ERROR("could not copy B matrix to device");
 
 	MatMultKernelS<<<blocksPerGrid, threadsPerBlock>>>(d_A, d_B, d_C, alpha, n);
 
@@ -72,8 +78,8 @@ int MatMultShared(const Matrix A, const Matrix B, Matrix C, const float alpha)
 	end_time = (double) timerValues.tv_sec	+ (double) (timerValues.tv_usec)/1000000;
 	printf("Total Time: %f\n", end_time-start_time);
 
-	cudaPrintfDisplay(stdout,true);
-	cudaPrintfEnd();
+	/*cudaPrintfDisplay(stdout,true);*/
+	/*cudaPrintfEnd();*/
 
 	cudaFree(d_A.els);
 	cudaFree(d_B.els);

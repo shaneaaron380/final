@@ -2,7 +2,7 @@
 #include "mat_mult_gpu.h"
 #include "sys/time.h"
 //#include "cuda.h"
-#include "cuPrintf.cuh"
+#include "cuPrintf.cu"
 
 __global__ void MatMultKernel(const Matrix A, const Matrix B, Matrix C, const float alpha, int n)
 {
