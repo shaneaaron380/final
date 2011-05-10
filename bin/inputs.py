@@ -253,6 +253,20 @@ def make_test_input_3_golden():
 	download('http://www.cs.utexas.edu/users/akanksha/cs380p/project/output_5000.txt',
 			this_func_input_name())
 
+def make_simple_A():
+	f = open(this_func_input_name(), 'w')
+	f.write('16 16\n')
+	r = range(16)
+	[ f.write('%d %d %.1f\n' % (i, j, float(j <= i))) for i in r for j in r ]
+	f.close()
+
+def make_simple_B():
+	f = open(this_func_input_name(), 'w')
+	f.write('16 16\n')
+	r = range(16)
+	[ f.write('%d %d %.1f\n' % (i, j, float(i + 1))) for i in r for j in r ]
+
+
 def Usage(ret_val = 0):
 	sys.stderr.write("""
 USAGE: %s [options]

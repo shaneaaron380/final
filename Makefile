@@ -113,6 +113,12 @@ gpu3: $(TARGET) $(INPUTS)
 		inputs/test_input_3b.txt 1.0 G \
 		obj/test_input_3.txt.gpu.out
 
+simple: $(TARGET) $(INPUTS)
+	./$(TARGET) \
+		inputs/simple_A.txt \
+		inputs/simple_B.txt 1.0 G \
+		obj/simple_A.txt.gpu.out
+
 ################################################################################
 # libraries
 ################################################################################
