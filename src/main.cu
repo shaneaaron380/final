@@ -80,7 +80,8 @@ int main(int argc, char *argv[])
 		if (which == 'G') {
 			printf("Using GPU implementation\n");
 			/*MatMultGPU(A, B, C, alpha);*/
-			MatMultShared(A, B, C, alpha);
+			if (MatMultShared(A, B, C, alpha) != SUCCESS)
+				RET_ERROR("MatMultShared failed");
 		} else {
 			printf("Using sequential implementation\n");
 			MatMultSeq(&A, &B, &C, alpha); 

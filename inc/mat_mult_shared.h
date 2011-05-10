@@ -3,6 +3,6 @@
 
 #include "matrix.h"
 
-void MatMultShared(const Matrix A, const Matrix B, Matrix C, const float alpha);
+int MatMultShared(const Matrix A, const Matrix B, Matrix C, const float alpha);
 
 #endif

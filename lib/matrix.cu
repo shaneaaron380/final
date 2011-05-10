@@ -10,8 +10,9 @@ int MatrixFromFile(char const* const filename, Matrix *m, int trans)
 	if (fscanf(f, "%d %d\n", &m->width, &m->height) != 2)
 		RET_ERROR("could not read width and height from %s", filename);
 
-	if (! (m->els = (float*) malloc(m->width * m->height * sizeof(m->els[0]))))
-		RET_ERROR("could not allocate memory for elements from %s", filename);
+	cudaError_t r;
+	r = cudaMallocHost(&m->els, m->width * m->height * sizeof(m->els[0]));
+	if (r != cudaSuccess) RET_ERROR("couldn't allocate host mem for matrix");
 
 	if (trans == MATRIX_FILE_TRANSPOSE) {
 		for (int i = 0; i < m->height; ++i)
@@ -74,8 +75,9 @@ int MatrixFromCOOFile(char const* const filename, Matrix *m, int trans)
 	if (fscanf(f, "%d %d\n", &m->height, &m->width) != 2)
 		RET_ERROR("could not read width and height from %s", filename);
 
-	if (! (m->els = (float*) malloc(m->height * m->width * sizeof(m->els[0]))))
-		RET_ERROR("could not allocate memory for elements from %s", filename);
+	cudaError_t r;
+	r = cudaMallocHost(&m->els, m->width * m->height * sizeof(m->els[0]));
+	if (r != cudaSuccess) RET_ERROR("couldn't allocate host mem for matrix");
 
 	// zero out everything since we don't have any guarantees about the matrix
 	bzero(m->els, m->height * m->width * sizeof(m->els[0]));

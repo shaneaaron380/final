@@ -21,13 +21,11 @@ __global__ void MatMultKernelS(const Matrix A, const Matrix B, Matrix C, const f
 }
 
 
-void MatMultShared(const Matrix A, const Matrix B, Matrix C, const float alpha)
+int MatMultShared(const Matrix A, const Matrix B, Matrix C, const float alpha)
 {
 	Matrix d_A, d_B, d_C;
 
-
 	const int n = A.width;
-	cudaError_t cudaMallocReturnStatus;
 	struct timeval timerValues;
 	double start_time, end_time;
 	timerclear(&timerValues);	
@@ -38,27 +36,21 @@ void MatMultShared(const Matrix A, const Matrix B, Matrix C, const float alpha)
 	d_A.height = A.height;
 	size_t asize = ((A.width * A.height - A.width)/2) * sizeof(float);
 	cudaMalloc((void**)&d_A.els, asize);
-	cudaMallocReturnStatus = cudaMalloc((void**)&d_A.els, asize);
-	if (cudaMallocReturnStatus == cudaErrorMemoryAllocation) {
-		printf("ERROR: Couldn't allocate Matrix A on GPU, exiting\n"); exit(0);
-	}
+	if (cudaMalloc((void**) &d_A.els, asize) != cudaSuccess)
+		RET_ERROR("could not allocate matrix A on device");
 	TruncateMatrix(A);
 
 	d_B.width = d_B.stride = B.width;
 	d_B.height = B.height;
 	size_t size = B.width * B.height * sizeof(float);
-	cudaMalloc((void**)&d_B.els, size);
-	if (cudaMallocReturnStatus == cudaErrorMemoryAllocation) {
-		printf("ERROR: Couldn't allocate Matrix B on GPU, exiting\n"); exit(0);
-	}
+	if (cudaMalloc((void**) &d_B.els, size) != cudaSuccess)
+		RET_ERROR("could not allocate matrix A on device");
 
 	d_C.width = d_C.stride = C.width;
 	d_C.height = C.height;
 	size = C.width * C.height * sizeof(float);
-	cudaMalloc((void**)&d_C.els, size);
-	if (cudaMallocReturnStatus == cudaErrorMemoryAllocation) {
-		printf("ERROR: Couldn't allocate Matrix C on GPU, exiting\n"); exit(0);
-	}
+	if (cudaMalloc((void**) &d_C.els, size) != cudaSuccess)
+		RET_ERROR("could not allocate matrix A on device");
 
 	int threadsPerBlock = 512;
 	int blocksPerGrid = (n+threadsPerBlock-1)/threadsPerBlock;
@@ -86,6 +78,8 @@ void MatMultShared(const Matrix A, const Matrix B, Matrix C, const float alpha)
 	cudaFree(d_A.els);
 	cudaFree(d_B.els);
 	cudaFree(d_C.els);
+
+	return SUCCESS;
 }
 
 

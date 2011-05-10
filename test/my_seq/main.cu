@@ -76,8 +76,9 @@ int main(int argc, char *argv[])
 		printf("WARNING: Counldn't get end time of day\n");
 	
 	//if (timerisset(&timerValues)) 
-	end_time = (double) timerValues.tv_sec	+ (double) (timerValues.tv_usec)/1000000;
-	printf("End secs: %ld, End usecs: %ld, Total Time: %f\n", timerValues.tv_sec, timerValues.tv_usec, end_time-start_time);
+	end_time = (double) timerValues.tv_sec + (double) (timerValues.tv_usec)/1000000;
+	printf("End secs: %ld, End usecs: %d, Total Time: %f\n",
+			timerValues.tv_sec, timerValues.tv_usec, end_time-start_time);
 	
   if (useOldFormat) {
 		if (MatrixToFile(argv[5], &X, MATRIX_FILE_NO_TRANSPOSE) != SUCCESS)
@@ -87,9 +88,9 @@ int main(int argc, char *argv[])
 			RET_ERROR("could not write result matrix to %s", argv[5]);
 	}
 
-	free(A.els);
-	free(B.els);
-	free(X.els);
+	/*free(A.els);*/
+	/*free(B.els);*/
+	/*free(X.els);*/
 	
   return 0;
 }
