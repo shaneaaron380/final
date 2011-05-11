@@ -37,16 +37,18 @@ __global__ void MatMultKernel(const Matrix A, const Matrix B, Matrix C, const fl
 __global__ void MatMultKernelShared(const Matrix A, const Matrix B, Matrix C, const float alpha, const int N)
 {
   int l = 0;
+  int j = blockIdx.x * blockDim.x + threadIdx.x;
 	int t_idx = threadIdx.x;
-  int j = blockIdx.x * blockDim.x + t_idx;
   //int j = blockIdx.y * blockDim.y + threadIdx.y;
   //int M = N % A_SM_CACHE_SZ ? N/A_SM_CACHE_SZ+1 : N/A_SM_CACHE_SZ;
 	//int M = N > A_SM_CACHE_SZ ? A_SM_CACHE_SZ : N;
 	float S;
 
+
   __shared__ float As[A_SM_CACHE_SZ];
  
   if (j < N) {
+		cuPrintf("j = %d, t_idx = %d\n", j, t_idx);
     //cuPrintf("%d,%d : %d,%d : %d,%d\n", blockIdx.x, blockIdx.y, blockDim.x, blockDim.y, threadIdx.x, threadIdx.y);
    	C.els[j] = B.els[j]; 
 		for (int i = 1; i < N; i++) {
@@ -59,15 +61,26 @@ __global__ void MatMultKernelShared(const Matrix A, const Matrix B, Matrix C, co
       		if (t_idx < (i-k)) As[t_idx] = A.els[l+t_idx];
       		else As[t_idx] = 0;
 				}
-      	//As[THREADS_PER_BLOCK+threadIdx.x] = A.els[l+THREADS_PER_BLOCK+threadIdx.x];
       	//if (j == 0) cuPrintf("j=%d, i=%d, As[p]=%f\n", j, i, As[p]);
       	__syncthreads();
         //S -= A.els[i*N+k] * C.els[k*N+j]; //S -= A[i][k] * C[k][j];
         //S -= A.els[l] * C.els[k*N+j]; //S -= A[i][k] * C[k][j];
-				S -= As[k] * C.els[k*N+j] + As[k+1] * C.els[(k+1)*N+j] + As[k+2] * C.els[(k+2)*N+j] + As[k+3] * C.els[(k+3)*N+j]; //S -= A[i][k] * C[k][j];
-				S -= As[k+4] * C.els[(k+4)*N+j] + As[k+5] * C.els[(k+5)*N+j] + As[k+6] * C.els[(k+6)*N+j] + As[k+7] * C.els[(k+7)*N+j]; //S -= A[i][k] * C[k][j];
-				S -= As[k+8] * C.els[(k+8)*N+j] + As[k+9] * C.els[(k+9)*N+j] + As[k+10] * C.els[(k+10)*N+j] + As[k+11] * C.els[(k+11)*N+j]; //S -= A[i][k] * C[k][j];
-				S -= As[k+12] * C.els[(k+12)*N+j] + As[k+13] * C.els[(k+13)*N+j] + As[k+14] * C.els[(k+14)*N+j] + As[k+15] * C.els[(k+15)*N+j]; //S -= A[i][k] * C[k][j];
+				S -=	As[k] 		* C.els[k*N+j] 			+ \
+							As[k+1] 	* C.els[(k+1)*N+j] 	+ \
+							As[k+2] 	* C.els[(k+2)*N+j] 	+ \
+							As[k+3] 	* C.els[(k+3)*N+j] 	+ \
+							As[k+4] 	* C.els[(k+4)*N+j] 	+ \
+							As[k+5] 	* C.els[(k+5)*N+j] 	+ \
+							As[k+6] 	* C.els[(k+6)*N+j] 	+ \
+							As[k+7] 	* C.els[(k+7)*N+j] 	+ \
+							As[k+8] 	* C.els[(k+8)*N+j] 	+ \
+							As[k+9] 	* C.els[(k+9)*N+j] 	+ \
+							As[k+10] 	* C.els[(k+10)*N+j] + \
+							As[k+11] 	* C.els[(k+11)*N+j] + \
+							As[k+12] 	* C.els[(k+12)*N+j] + \
+							As[k+13] 	* C.els[(k+13)*N+j] + \
+							As[k+14] 	* C.els[(k+14)*N+j] + \
+							As[k+15] 	* C.els[(k+15)*N+j]; //S -= A[i][k] * C[k][j];
         //cuPrintf("i=%d,j=%d,k=%d, S=%f, A=%f, C=%f\n", i, j, k, S, As[k], C.els[k*N+j]);
       }
      	l += i;
