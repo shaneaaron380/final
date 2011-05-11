@@ -4,30 +4,32 @@
 //#include "cuda.h"
 #include "cuPrintf.cu"
 
-#define A_SM_CACHE_SZ 512 
+#define A_SM_CACHE_SZ 16 
 #define THREADS_PER_BLOCK 512 
 
-__global__ void MatMultKernel(const Matrix A, const Matrix B, Matrix C, const float alpha, int n)
+__global__ void MatMultKernel(const Matrix A, const Matrix B, Matrix C, const float alpha, const int N)
 {
   int l = 0;
   //int j = (gridDim.x-1)*512 + threadIdx.x;
   int j = blockIdx.x * blockDim.x + threadIdx.x;
   //int j = blockIdx.y * blockDim.y + threadIdx.y;
+  //int ixn = 0;
   float S;
 
-  if (j < n) {
+  if (j < N) {
     //cuPrintf("%d,%d : %d,%d : %d,%d\n", blockIdx.x, blockIdx.y, blockDim.x, blockDim.y, threadIdx.x, threadIdx.y);
     //if ( (j % 20) == 0) cuPrintf("%d,%d,%d\n", j, gridDim.x, threadIdx.x);
-    for (int i = 0; i < n; i++) {
-      S = alpha*B.els[i*n+j]; //S = B[i][j];
+    //for (int i = 0; i < N*N; i+=N) {
+    for (int i = 0; i < N; i++) {
+			//ixn = i * N;
+			S = alpha*B.els[i*N+j]; //S = B[i][j];
       //cuPrintf("i=%d,j=%d, S=%f\n", i, j, S);
       for (int k = 0; k < i; k++) {
         //S -= A.els[i*n+k] * C.els[k*n+j]; //S -= A[i][k] * C[k][j];
-        S -= A.els[l] * C.els[k*n+j]; //S -= A[i][k] * C[k][j];
-        l++;
+        S -= A.els[l++] * C.els[k*N+j]; //S -= A[i][k] * C[k][j];
         //cuPrintf("i=%d,j=%d,k=%d, S=%f, A=%f, C=%f\n", i, j, k, S, A.els[i*n+k], C.els[k*n+j]);
       }
-      C.els[i*n+j] = S; //C[i][j] = S;
+      C.els[i*N+j] = S; //C[i][j] = S;
     }
   }
 }
@@ -35,29 +37,37 @@ __global__ void MatMultKernel(const Matrix A, const Matrix B, Matrix C, const fl
 __global__ void MatMultKernelShared(const Matrix A, const Matrix B, Matrix C, const float alpha, const int N)
 {
   int l = 0;
-  int j = blockIdx.x * blockDim.x + threadIdx.x;
+	int t_idx = threadIdx.x;
+  int j = blockIdx.x * blockDim.x + t_idx;
   //int j = blockIdx.y * blockDim.y + threadIdx.y;
-  //int m = N%THREADS_PER_BLOCK ? N/THREADS_PER_BLOCK+1 : N/THREADS_PER_BLOCK;
-	int M = N > A_SM_CACHE_SZ ? A_SM_CACHE_SZ : N;
+  //int M = N % A_SM_CACHE_SZ ? N/A_SM_CACHE_SZ+1 : N/A_SM_CACHE_SZ;
+	//int M = N > A_SM_CACHE_SZ ? A_SM_CACHE_SZ : N;
 	float S;
 
   __shared__ float As[A_SM_CACHE_SZ];
  
   if (j < N) {
     //cuPrintf("%d,%d : %d,%d : %d,%d\n", blockIdx.x, blockIdx.y, blockDim.x, blockDim.y, threadIdx.x, threadIdx.y);
-    for (int i = 0; i < N; i++) {
-     
-      S = alpha*B.els[i*N+j]; //S = B[i][j];
-      __syncthreads();
-      if (threadIdx.x < i) As[threadIdx.x] = A.els[l+threadIdx.x];
-      //As[THREADS_PER_BLOCK+threadIdx.x] = A.els[l+THREADS_PER_BLOCK+threadIdx.x];
-      //if (j == 0) cuPrintf("j=%d, i=%d, As[p]=%f\n", j, i, As[p]);
-      __syncthreads();
+   	C.els[j] = B.els[j]; 
+		for (int i = 1; i < N; i++) {
+      
+			S = alpha*B.els[i*N+j]; //S = B[i][j];
       //cuPrintf("i=%d,j=%d, S=%f\n", i, j, S);
-      for (int k = 0; k < i; k++) {
+			for (int k = 0; k < i; k+=A_SM_CACHE_SZ) {
+				__syncthreads();
+				if (t_idx < A_SM_CACHE_SZ) { 
+      		if (t_idx < (i-k)) As[t_idx] = A.els[l+t_idx];
+      		else As[t_idx] = 0;
+				}
+      	//As[THREADS_PER_BLOCK+threadIdx.x] = A.els[l+THREADS_PER_BLOCK+threadIdx.x];
+      	//if (j == 0) cuPrintf("j=%d, i=%d, As[p]=%f\n", j, i, As[p]);
+      	__syncthreads();
         //S -= A.els[i*N+k] * C.els[k*N+j]; //S -= A[i][k] * C[k][j];
         //S -= A.els[l] * C.els[k*N+j]; //S -= A[i][k] * C[k][j];
-				S -= As[k] * C.els[k*N+j]; //S -= A[i][k] * C[k][j];
+				S -= As[k] * C.els[k*N+j] + As[k+1] * C.els[(k+1)*N+j] + As[k+2] * C.els[(k+2)*N+j] + As[k+3] * C.els[(k+3)*N+j]; //S -= A[i][k] * C[k][j];
+				S -= As[k+4] * C.els[(k+4)*N+j] + As[k+5] * C.els[(k+5)*N+j] + As[k+6] * C.els[(k+6)*N+j] + As[k+7] * C.els[(k+7)*N+j]; //S -= A[i][k] * C[k][j];
+				S -= As[k+8] * C.els[(k+8)*N+j] + As[k+9] * C.els[(k+9)*N+j] + As[k+10] * C.els[(k+10)*N+j] + As[k+11] * C.els[(k+11)*N+j]; //S -= A[i][k] * C[k][j];
+				S -= As[k+12] * C.els[(k+12)*N+j] + As[k+13] * C.els[(k+13)*N+j] + As[k+14] * C.els[(k+14)*N+j] + As[k+15] * C.els[(k+15)*N+j]; //S -= A[i][k] * C[k][j];
         //cuPrintf("i=%d,j=%d,k=%d, S=%f, A=%f, C=%f\n", i, j, k, S, As[k], C.els[k*N+j]);
       }
      	l += i;
@@ -65,6 +75,41 @@ __global__ void MatMultKernelShared(const Matrix A, const Matrix B, Matrix C, co
     }
   }
 }
+
+//__global__ void MatMultKernelShared(const Matrix A, const Matrix B, Matrix C, const float alpha, const int N)
+//{
+//  int l = 0;
+//  int j = blockIdx.x * blockDim.x + threadIdx.x;
+//  //int j = blockIdx.y * blockDim.y + threadIdx.y;
+//  int M = N % A_SM_CACHE_SZ ? N/A_SM_CACHE_SZ+1 : N/A_SM_CACHE_SZ;
+//	//int M = N > A_SM_CACHE_SZ ? A_SM_CACHE_SZ : N;
+//	float S;
+//
+//  __shared__ float As[A_SM_CACHE_SZ];
+// 
+//  if (j < N) {
+//    //cuPrintf("%d,%d : %d,%d : %d,%d\n", blockIdx.x, blockIdx.y, blockDim.x, blockDim.y, threadIdx.x, threadIdx.y);
+//    for (int i = 0; i < N; i++) {
+//			int row1 = i*N;
+//      S = alpha*B.els[row1+j]; //S = B[i][j];
+//      __syncthreads();
+//      if (threadIdx.x < i) As[threadIdx.x] = A.els[l+threadIdx.x];
+//      else As[threadIdx.x] = 0;
+//      //As[THREADS_PER_BLOCK+threadIdx.x] = A.els[l+THREADS_PER_BLOCK+threadIdx.x];
+//      //if (j == 0) cuPrintf("j=%d, i=%d, As[p]=%f\n", j, i, As[p]);
+//      __syncthreads();
+//      //cuPrintf("i=%d,j=%d, S=%f\n", i, j, S);
+//			for (int k = 0; k < i; k+=4) {
+//        //S -= A.els[i*N+k] * C.els[k*N+j]; //S -= A[i][k] * C[k][j];
+//        //S -= A.els[l] * C.els[k*N+j]; //S -= A[i][k] * C[k][j];
+//				S -= As[k] * C.els[k*N+j] + As[k+1] * C.els[(k+1)*N+j] + As[k+2] * C.els[(k+2)*N+j] + As[k+3] * C.els[(k+3)*N+j]; //S -= A[i][k] * C[k][j];
+//        //cuPrintf("i=%d,j=%d,k=%d, S=%f, A=%f, C=%f\n", i, j, k, S, As[k], C.els[k*N+j]);
+//      }
+//     	l += i;
+//      C.els[row1+j] = S; //C[i][j] = S;
+//    }
+//  }
+//}
 
 //__global__ void MatMultKernelShared(const Matrix A, const Matrix B, Matrix C, const float alpha, const int n)
 //{
@@ -200,6 +245,7 @@ void MatMultGPU(const Matrix A, const Matrix B, Matrix C, const float alpha)
 	
   //printf("grids=%d, threads=%d\n", blocksPerGrid, threadsPerBlock);
 	MatMultKernel<<<blocksPerGrid, threadsPerBlock>>>(d_A, d_B, d_C, alpha, n);
+	//MatMultKernelShared<<<blocksPerGrid, threadsPerBlock>>>(d_A, d_B, d_C, alpha, n);
 	//MatMultKernelShared<<<blocksPerGrid, threadsPerBlock, sizeof(float)*(n-1)>>>(d_A, d_B, d_C, alpha, n);
 	//MatMultKernel<<<1, 3, sizeof(float)*(n-1)>>>(d_A, d_B, d_C, alpha, n);
 	cudaThreadSynchronize();	
