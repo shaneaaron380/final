@@ -70,7 +70,6 @@ int main(int argc, char *argv[])
 			RET_ERROR("MatMultCublas failed");
 
 	} else {
-		out = &C;
 		C.height = A.height;
 		C.width = B.width;
 		C.stride = C.width;
@@ -78,11 +77,13 @@ int main(int argc, char *argv[])
 			RET_ERROR("could not allocate space for results matrix");
 
 		if (which == 'G') {
+			out = &B;
 			printf("Using GPU implementation\n");
 			MatMultGPU(A, B, C, alpha);
 			/*if (MatMultShared(A, B, C, alpha) != SUCCESS)*/
 			/*    RET_ERROR("MatMultShared failed");*/
 		} else {
+			out = &C;
 			printf("Using sequential implementation\n");
 			MatMultSeq(&A, &B, &C, alpha); 
 		}
