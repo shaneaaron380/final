@@ -79,8 +79,7 @@ def main():
 							(i, j, a[i*l + j], b[i*l + j]))
 				errors += 1
 
-	if errors > 0:
-		print 'Found %d errors' % errors
+	print 'Found %d errors' % errors
 
 	return errors
 
