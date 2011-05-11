@@ -25,7 +25,12 @@ def sign(a):
 	return '%.3e' % float(a)
 
 def err(a, b):
-	return (a - b) / a
+	if a != 0:
+		return (a - b) / a
+	elif b != 0:
+		return (a - b) / b
+	else:
+		return 0
 
 def close_enough(a, b):
 	return err(a, b) < .005
