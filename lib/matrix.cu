@@ -139,5 +139,6 @@ void TruncateMatrix(Matrix A)
       }
     }
   }
+fprintf(stderr, "---------- max: %d\n", k);
 }
 

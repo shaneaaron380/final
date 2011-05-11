@@ -2,7 +2,7 @@
 #include "mat_mult_gpu.h"
 #include "sys/time.h"
 //#include "cuda.h"
-#include "cuPrintf.cu"
+/*#include "cuPrintf.cu"*/
 
 __global__ void MatMultKernel(const Matrix A, const Matrix B, Matrix C, const float alpha, int n)
 {
@@ -110,7 +110,7 @@ void MatMultGPU(const Matrix A, const Matrix B, Matrix C, const float alpha)
 	double start_time, end_time;
 	timerclear(&timerValues);	
 
-  cudaPrintfInit();
+  /*cudaPrintfInit();*/
 
 	d_A.width = d_A.stride = A.width;
 	d_A.height = A.height;
@@ -171,8 +171,8 @@ void MatMultGPU(const Matrix A, const Matrix B, Matrix C, const float alpha)
 	//printf("End secs: %ld, End usecs: %ld, Total Time: %f\n", timerValues.tv_sec, timerValues.tv_usec, end_time-start_time);
 	printf("Total Time: %f\n", end_time-start_time);
   
-  cudaPrintfDisplay(stdout,true);
-  cudaPrintfEnd();
+  /*cudaPrintfDisplay(stdout,true);*/
+  /*cudaPrintfEnd();*/
 
 	cudaFree(d_A.els);
 	cudaFree(d_B.els);

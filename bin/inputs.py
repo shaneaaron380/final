@@ -272,6 +272,36 @@ def make_simple_A_golden():
 	r = range(16)
 	[ f.write('%d %d %.1f\n' % (i, j, float(int(1)))) for i in r for j in r ]
 
+_meduim_simple_size = 6
+def make_medium_simple_A():
+	def val(i, j):
+		if j < i:
+			return j
+		elif j == i:
+			return 1.0
+		else:
+			return 0.0
+
+	f = open(this_func_input_name(), 'w')
+	f.write('%d %d\n' % (_meduim_simple_size, _meduim_simple_size))
+	r = range(_meduim_simple_size)
+	[ f.write('%d %d %.1f\n' % (i, j, val(i, j))) for i in r for j in r ]
+	f.close()
+
+def make_medium_simple_B():
+	def val(i, j):
+		return i * (1 + i) / 2 + 1
+	f = open(this_func_input_name(), 'w')
+	f.write('%d %d\n' % (_meduim_simple_size, _meduim_simple_size))
+	r = range(_meduim_simple_size)
+	[ f.write('%d %d %.1f\n' % (i, j, val(i, j))) for i in r for j in r ]
+
+def make_medium_simple_A_golden():
+	f = open(this_func_input_name(), 'w')
+	f.write('%d %d\n' % (_meduim_simple_size, _meduim_simple_size))
+	r = range(_meduim_simple_size)
+	[ f.write('%d %d %.1f\n' % (i, j, float(int(1)))) for i in r for j in r ]
+
 
 def Usage(ret_val = 0):
 	sys.stderr.write("""

@@ -1,6 +1,6 @@
 #include "mat_mult_shared.h"
 #include "sys/time.h"
-/*#include "cuPrintf.cuh"*/
+#include "cuPrintf.cu"
 
 #define COLS_IN_SHMEM 4
 
@@ -10,13 +10,38 @@ __global__ void MatMultKernelS(const Matrix A, const Matrix B, Matrix C, const f
 	int j = blockIdx.x * blockDim.x + threadIdx.x;
 	float S;
 
-	/*cuPrintf("123");*/
+	/*cuPrintf("(%d %d %d), (%d %d %d), (%d %d %d)\n", */
+	/*        blockIdx.x,*/
+	/*        blockIdx.y,*/
+	/*        blockIdx.z,*/
+	/*        blockDim.x,*/
+	/*        blockDim.y,*/
+	/*        blockDim.z,*/
+	/*        threadIdx.x,*/
+	/*        threadIdx.y,*/
+	/*        threadIdx.z);*/
+
+	__shared__ float As[COLS_IN_SHMEM];
+	/*cuPrintf("%d\n", j);*/
 
 	if (j < n) {
 		for (int i = 0; i < n; i++) {
 			S = alpha*B.els[i*n+j];
 			for (int k = 0; k < i; k++) {
-				S -= A.els[l] * C.els[k*n+j]; //S -= A[i][k] * C[k][j];
+
+				if (k % COLS_IN_SHMEM == 0 && l + j % COLS_IN_SHMEM < n * (n + 1) / 2) {
+					As[j%COLS_IN_SHMEM] = A.els[l + j % COLS_IN_SHMEM];
+				} else {
+					/*cuPrintf("%d %d %d\n", l, j % COLS_IN_SHMEM, n * (n + 1) / 2);*/
+				}
+					if (A.els[l + j%COLS_IN_SHMEM] >= 4) {
+						cuPrintf("%d < %d\n", j%COLS_IN_SHMEM, l + j%COLS_IN_SHMEM);
+					}
+				__syncthreads();
+
+				/*S -= A.els[l] * C.els[k*n+j];*/
+				/*S -= As[k%COLS_IN_SHMEM] * C.els[k*n+j];*/
+				S -= As[l%COLS_IN_SHMEM] * C.els[k*n+j];
 				l++;
 			}
 			C.els[i*n+j] = S;
@@ -34,7 +59,7 @@ int MatMultShared(const Matrix A, const Matrix B, Matrix C, const float alpha)
 	double start_time, end_time;
 	timerclear(&timerValues);	
 
-	/*cudaPrintfInit();*/
+	cudaPrintfInit();
 
 	d_A.width = d_A.stride = A.width;
 	d_A.height = A.height;
@@ -42,7 +67,20 @@ int MatMultShared(const Matrix A, const Matrix B, Matrix C, const float alpha)
 	cudaMalloc((void**)&d_A.els, asize);
 	if (cudaMalloc((void**) &d_A.els, asize) != cudaSuccess)
 		RET_ERROR("could not allocate matrix A on device");
+
+	for (int i = 0; i < n; ++i) {
+		for (int j = 0; j < n; ++j)
+			fprintf(stderr, "%f ", A.els[i * n + j]);
+		fprintf(stderr, "\n");
+	}
+
 	TruncateMatrix(A);
+
+	for (int i = 0; i < n; ++i) {
+		for (int j = 0; j < n; ++j)
+			fprintf(stderr, "%f ", A.els[i * n + j]);
+		fprintf(stderr, "\n");
+	}
 
 	d_B.width = d_B.stride = B.width;
 	d_B.height = B.height;
@@ -56,8 +94,9 @@ int MatMultShared(const Matrix A, const Matrix B, Matrix C, const float alpha)
 	if (cudaMalloc((void**) &d_C.els, size) != cudaSuccess)
 		RET_ERROR("could not allocate matrix A on device");
 
-	int threadsPerBlock = 512;
-	int blocksPerGrid = (n+threadsPerBlock-1)/threadsPerBlock;
+	/*int threadsPerBlock = 512;*/
+	/*int blocksPerGrid = (n+threadsPerBlock-1)/threadsPerBlock;*/
+	int blocksPerGrid = (n+COLS_IN_SHMEM-1)/COLS_IN_SHMEM;
 
 	if (gettimeofday(&timerValues, NULL))
 		printf("WARNING: Counldn't get start time of day\n");
@@ -69,7 +108,7 @@ int MatMultShared(const Matrix A, const Matrix B, Matrix C, const float alpha)
 	if (cudaMemcpy(d_B.els, B.els, size, cudaMemcpyHostToDevice) != cudaSuccess)
 		RET_ERROR("could not copy B matrix to device");
 
-	MatMultKernelS<<<blocksPerGrid, threadsPerBlock>>>(d_A, d_B, d_C, alpha, n);
+	MatMultKernelS<<<blocksPerGrid, COLS_IN_SHMEM>>>(d_A, d_B, d_C, alpha, n);
 
 	cudaMemcpy(C.els, d_C.els, size, cudaMemcpyDeviceToHost);
 	if (gettimeofday(&timerValues, NULL))
@@ -78,8 +117,8 @@ int MatMultShared(const Matrix A, const Matrix B, Matrix C, const float alpha)
 	end_time = (double) timerValues.tv_sec	+ (double) (timerValues.tv_usec)/1000000;
 	printf("Total Time: %f\n", end_time-start_time);
 
-	/*cudaPrintfDisplay(stdout,true);*/
-	/*cudaPrintfEnd();*/
+	cudaPrintfDisplay(stdout,true);
+	cudaPrintfEnd();
 
 	cudaFree(d_A.els);
 	cudaFree(d_B.els);
