@@ -57,6 +57,10 @@ run_all:
 	make cublas
 	make seq
 
+run_cuda:
+	make gpu
+	make cublas
+
 run1: $(TARGET) $(INPUTS)
 	./$(TARGET) inputs/test_input_64_inc.txt inputs/test_input_64_inc.txt 1.0 G obj/test_input_64_inc.txt.gpu.out o
 
