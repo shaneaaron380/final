@@ -41,7 +41,9 @@ __global__ void MatMultKernelShared(const Matrix A, Matrix B, const float alpha,
   //if (t_idx < SMEM_CACHE_SZ) As[t_idx] = 0;
  
   if (j < N) {
-   	B.els[j] = alpha*B.els[j];
+   	
+		B.els[j] = alpha*B.els[j];
+		
 		for (int i = 1; i < N; i++) {
       
 			S = alpha*B.els[i*N+j]; 
@@ -89,7 +91,6 @@ __global__ void MatMultKernelShared(const Matrix A, Matrix B, const float alpha,
       }
       __syncthreads();
       B.els[i*N+j] = S;
-      __syncthreads();
     }
   }
 }
