@@ -51,7 +51,7 @@ __global__ void MatMultKernelShared(const Matrix A, const Matrix B, Matrix C, co
   if (j < N) {
 		//cuPrintf("j = %d, t_idx = %d\n", j, t_idx);
     //cuPrintf("%d,%d : %d,%d : %d,%d\n", blockIdx.x, blockIdx.y, blockDim.x, blockDim.y, threadIdx.x, threadIdx.y);
-   	C.els[j] = B.els[j];
+   	C.els[j] = alpha*B.els[j];
     //if (t_idx == 241) cuPrintf("j=%d, C.els[j]=%f, B.els[j]=%f\n", j, C.els[j], B.els[j]);
 		for (int i = 1; i < N; i++) {
       
