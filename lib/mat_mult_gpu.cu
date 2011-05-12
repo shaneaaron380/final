@@ -81,10 +81,10 @@ __global__ void MatMultKernelShared(const Matrix A, Matrix B, const float alpha,
       }
       while (k < i)  {
         //__syncthreads();
-      	if (t_idx == 0) As[0] = A.els[l];
+      	if (t_idx < 16) As[t_idx] = A.els[l];
         __syncthreads();
         
-				S -= As[0] * B.els[k*N+j];
+				S -= As[t_idx & 0xf] * B.els[k*N+j];
      	  
 				k++;
      	  l++;
