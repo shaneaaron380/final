@@ -77,8 +77,9 @@ int main(int argc, char *argv[])
 	
 	//if (timerisset(&timerValues)) 
 	end_time = (double) timerValues.tv_sec + (double) (timerValues.tv_usec)/1000000;
-	printf("End secs: %ld, End usecs: %d, Total Time: %f\n",
+	//printf("End secs: %ld, End usecs: %d, Total Time: %f\n", \
 			timerValues.tv_sec, timerValues.tv_usec, end_time-start_time);
+	printf("Total Time: %f\n", end_time-start_time);
 	
   if (useOldFormat) {
 		if (MatrixToFile(argv[5], &X, MATRIX_FILE_NO_TRANSPOSE) != SUCCESS)

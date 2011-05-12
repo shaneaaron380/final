@@ -20,13 +20,13 @@ void MatMultSeq(Matrix *A, Matrix *B, Matrix *X, float alpha) {
   //calculate rest of X[1..n] values
   for (j = 0; j < n; j++) {
     for (i = 0; i < n; i++) {
-      S = alpha*B->els[i*B->width+j]; // S = alpha*B[i][j];
+      S = alpha*B->els[i*n+j]; // S = alpha*B[i][j];
       //printf("i=%d,j=%d, S=%f\n", i, j, S);
       for (k = 0; k < i; k++) {
-        S -= A->els[i*A->width+k] * X->els[k*X->width+j];// S -= A[i][k] * X[k][j];
+        S -= A->els[i*n+k] * X->els[k*n+j];// S -= A[i][k] * X[k][j];
         //printf("k=%d, S=%f\n", k, S);
       }
-      X->els[i*X->width+j] = S; // X[i][j] = S; 
+      X->els[i*n+j] = S; // X[i][j] = S; 
     }
   }
   

@@ -10,7 +10,7 @@ void Usage(int retVal, char *argv0)
 {
 	fprintf(retVal == 0? stdout : stderr,
 			"USAGE: %s <matrix A input file> <matrix B input file> "
-			"<output matrix file> <alpha> <S,G,C> [o]\n", argv0);
+			"<alpha> <S,G,C> <output matrix file> [o]\n", argv0);
 
 	exit(retVal);
 }
