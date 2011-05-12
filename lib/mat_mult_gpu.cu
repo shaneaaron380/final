@@ -89,7 +89,7 @@ __global__ void MatMultKernelShared(const Matrix A, Matrix B, const float alpha,
 				k++;
      	  l++;
       }
-      __syncthreads();
+      //__syncthreads();
       B.els[i*N+j] = S;
     }
   }
