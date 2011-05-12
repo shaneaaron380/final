@@ -50,7 +50,7 @@ __global__ void MatMultKernelShared(const Matrix A, Matrix B, const float alpha,
 			k = 0;
 			
 			while ((k + 10) <= i) {
-        __syncthreads();
+        //__syncthreads();
 				if (t_idx < 10) As[t_idx] = A.els[l+t_idx];
       	__syncthreads();
         
@@ -68,19 +68,19 @@ __global__ void MatMultKernelShared(const Matrix A, Matrix B, const float alpha,
      	  l+=10;
       }
 			while ((k + 4) <= i) {
-        __syncthreads();
+        //__syncthreads();
 				if (t_idx < 4) As[t_idx] = A.els[l+t_idx];
       	__syncthreads();
         
 				S -=  (As[0]  * B.els[k*N+j]) + \
 							(As[1]  * B.els[(k+1)*N+j]) + \
 							(As[2]  * B.els[(k+2)*N+j]) + \
-							(As[3]  * B.els[(k+3)*N+j]); 
+							(As[3]  * B.els[(k+3)*N+j]);
         k+=4;
      	  l+=4;
       }
       while (k < i)  {
-        __syncthreads();
+        //__syncthreads();
       	if (t_idx == 0) As[0] = A.els[l];
         __syncthreads();
         
