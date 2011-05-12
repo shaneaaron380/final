@@ -63,7 +63,7 @@ __global__ void MatMultKernelShared(const Matrix A, Matrix B, const float alpha,
 							(As[6]  * B.els[(k+6)*N+j]) + \
 							(As[7]  * B.els[(k+7)*N+j]) + \
 							(As[8]  * B.els[(k+8)*N+j]) + \
-							(As[9]  * B.els[(k+9)*N+j]);
+							(As[9]  * B.els[(k+9)*N+j]); 
         k+=10;
      	  l+=10;
       }
@@ -81,10 +81,12 @@ __global__ void MatMultKernelShared(const Matrix A, Matrix B, const float alpha,
       }
       while (k < i)  {
         //__syncthreads();
-      	if (t_idx < 16) As[t_idx] = A.els[l];
+      	//if (t_idx < 16) As[t_idx] = A.els[l];
+      	if (t_idx == 0) As[t_idx] = A.els[l];
         __syncthreads();
         
-				S -= As[t_idx & 0xf] * B.els[k*N+j];
+				S -= As[0] * B.els[k*N+j];
+				//S -= As[t_idx & 0xf] * B.els[k*N+j];
      	  
 				k++;
      	  l++;
@@ -133,7 +135,7 @@ void MatMultGPU(const Matrix A, const Matrix B, Matrix C, const float alpha)
 	//	printf("ERROR: Couldn't allocate Matrix C on GPU, exiting\n"); exit(0);
 	//}
 
-  int threadsPerBlock = n > 512 ? 512 : n;
+  int threadsPerBlock = 256;
   int blocksPerGrid = (n+threadsPerBlock-1)/threadsPerBlock;
   printf("grids=%d, threads=%d\n", blocksPerGrid, threadsPerBlock);
 	
