@@ -249,25 +249,25 @@ seq:
 	make seq2
 	make seq3
 
-seq1: bin/my_seq $(INPUTS)
-	bin/my_seq \
+seq1: $(TARGET) $(INPUTS)
+	$(TARGET) \
 		inputs/test_input_1a.txt \
 		inputs/test_input_1b.txt \
-		1.0 C \
+		1.0 S \
 		obj/test_input_1.txt.seq.out
 
-seq2: bin/my_seq $(INPUTS)
-	bin/my_seq \
+seq2: $(TARGET) $(INPUTS)
+	$(TARGET) \
 		inputs/test_input_2a.txt \
 		inputs/test_input_2b.txt \
-		1.0 C \
+		1.0 S \
 		obj/test_input_2.txt.seq.out
 
-seq3: bin/my_seq $(INPUTS)
-	bin/my_seq \
+seq3: $(TARGET) $(INPUTS)
+	$(TARGET) \
 		inputs/test_input_3a.txt \
 		inputs/test_input_3b.txt \
-		1.0 C \
+		1.0 S \
 		obj/test_input_3.txt.seq.out
 
 bin/my_seq: obj/my_seq.o obj/mat_mult_seq.o obj/matrix.o | $(OBJ_DIR)
