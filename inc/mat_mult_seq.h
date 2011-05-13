@@ -5,6 +5,6 @@
 
 #include "matrix.h"
 
-void MatMultSeq(Matrix *A, Matrix *B, Matrix *X, float alpha);
+int MatMultSeq(Matrix *A, Matrix *B, Matrix *X, float alpha);
 
 #endif

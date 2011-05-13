@@ -5,7 +5,7 @@
 
 #define BLOCK_SIZE 16
 
-void MatMultGPU(const Matrix A, const Matrix B, Matrix C, const float alpha);
+int MatMultGPU(const Matrix A, const Matrix B, Matrix C, const float alpha);
 
 #endif
 

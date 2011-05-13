@@ -1,5 +1,5 @@
+#include <sys/time.h>
 #include "mat_mult_gpu.h"
-#include "sys/time.h"
 #include "cuPrintf.cu"
 
 #define SMEM_CACHE_SZ 32 
@@ -139,7 +139,6 @@ int MatMultGPU(const Matrix A, const Matrix B, Matrix C, const float alpha)
 {
 	Matrix d_A, d_B;
 	const int n = A.width;
-	/*cudaError_t cudaMallocReturnStatus;*/
 	struct timeval timerValues;
 	double start_time, end_time;
 	double before_kernel, after_kernel;
