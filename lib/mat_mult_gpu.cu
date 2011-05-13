@@ -135,11 +135,11 @@ __global__ void MatMultKernelAlignedShared(const Matrix A, Matrix B, const float
 }
 
 
-void MatMultGPU(const Matrix A, const Matrix B, Matrix C, const float alpha)
+int MatMultGPU(const Matrix A, const Matrix B, Matrix C, const float alpha)
 {
 	Matrix d_A, d_B;
 	const int n = A.width;
-	cudaError_t cudaMallocReturnStatus;
+	/*cudaError_t cudaMallocReturnStatus;*/
 	struct timeval timerValues;
 	double start_time, end_time;
 	double before_kernel, after_kernel;
@@ -150,37 +150,38 @@ void MatMultGPU(const Matrix A, const Matrix B, Matrix C, const float alpha)
 	d_A.width = d_A.stride = A.width;
 	d_A.height = A.height;
 	size_t asize = GetPadMatrixSize(A.width,16) * sizeof(float);
-	cudaMalloc((void**)&d_A.els, asize);
-	cudaMallocReturnStatus = cudaMalloc((void**)&d_A.els, asize);
-	if (cudaMallocReturnStatus == cudaErrorMemoryAllocation) {
-		printf("ERROR: Couldn't allocate Matrix A on GPU, exiting\n"); exit(0);
-	}
+	if (cudaMalloc((void**) &d_A.els, asize) != cudaSuccess)
+		RET_ERROR("could not allocate matrix A on device");
+
 	TruncAndPadMatrix(A,16);
 
 	d_B.width = d_B.stride = B.width;
 	d_B.height = B.height;
-	size_t size = B.width * B.height * sizeof(float);
-	cudaMalloc((void**)&d_B.els, size);
-	if (cudaMallocReturnStatus == cudaErrorMemoryAllocation) {
-		printf("ERROR: Couldn't allocate Matrix B on GPU, exiting\n"); exit(0);
-	}
+	size_t bsize = B.width * B.height * sizeof(float);
+	if (cudaMalloc((void**) &d_B.els, bsize) != cudaSuccess)
+		RET_ERROR("could not allocate matrix A on device");
 
 	int threadsPerBlock = 128;
 	int blocksPerGrid = (n+threadsPerBlock-1)/threadsPerBlock;
 	printf("grids=%d, threads=%d\n", blocksPerGrid, threadsPerBlock);
 
 	if (gettimeofday(&timerValues, NULL))
-		printf("WARNING: Counldn't get start time of day\n");
+		RET_ERROR("could not gettimeofday for start_time");
 
-	start_time = (double) timerValues.tv_sec	+ (double) (timerValues.tv_usec)/1000000;
+	start_time = (double) timerValues.tv_sec +
+				 (double) (timerValues.tv_usec) / 1000000.0;
 
-	cudaMemcpy(d_A.els, A.els, asize, cudaMemcpyHostToDevice);
-	cudaMemcpy(d_B.els, B.els, size, cudaMemcpyHostToDevice);
+	if (cudaMemcpy(d_A.els, A.els, asize, cudaMemcpyHostToDevice) != cudaSuccess)
+		RET_ERROR("could not copy data to A matrix");
+
+	if (cudaMemcpy(d_B.els, B.els, bsize, cudaMemcpyHostToDevice) != cudaSuccess)
+		RET_ERROR("could not copy data to B matrix");
 
 	if (gettimeofday(&timerValues, NULL))
-		printf("WARNING: Counldn't get before kernel time of day\n");
+		RET_ERROR("could not gettimeofday for before_kernel");
 
-	before_kernel = (double) timerValues.tv_sec	+ (double) (timerValues.tv_usec)/1000000;
+	before_kernel = (double) timerValues.tv_sec	+
+					(double) (timerValues.tv_usec) / 1000000.0;
 
 	//MatMultKernel<<<blocksPerGrid, threadsPerBlock>>>(d_A, d_B, alpha, n);
 
@@ -193,25 +194,32 @@ void MatMultGPU(const Matrix A, const Matrix B, Matrix C, const float alpha)
 	cudaThreadSynchronize();	
 
 	if (gettimeofday(&timerValues, NULL))
-		printf("WARNING: Counldn't get after kernel time of day\n");
+		RET_ERROR("could not gettimeofday for after_kernel");
 
-	after_kernel = (double) timerValues.tv_sec	+ (double) (timerValues.tv_usec)/1000000;
+	after_kernel =  (double) timerValues.tv_sec +
+					(double) (timerValues.tv_usec) / 1000000.0;
 
-	cudaMemcpy(C.els, d_B.els, size, cudaMemcpyDeviceToHost);
+	if (cudaMemcpy(C.els, d_B.els, bsize, cudaMemcpyDeviceToHost) != cudaSuccess)
+		RET_ERROR("could not copy result matrix back to host");
 
 	if (gettimeofday(&timerValues, NULL))
-		printf("WARNING: Counldn't get end time of day\n");
+		RET_ERROR("could not gettimeofday for end_time");
 
-	end_time = (double) timerValues.tv_sec	+ (double) (timerValues.tv_usec)/1000000;
-	printf("Total Time: %f\n", end_time-start_time);
-	printf("Kernel Time: %f\n", after_kernel-before_kernel);
-	printf("Transfer Time: %f\n", (end_time-after_kernel)+(before_kernel-start_time));
+	end_time =  (double) timerValues.tv_sec	+
+				(double) (timerValues.tv_usec) / 1000000.0;
+
+	printf("Total Time: %f\n", end_time - start_time);
+	printf("Kernel Time: %f\n", after_kernel - before_kernel);
+	printf("Transfer Time: %f\n",   (end_time - after_kernel) + 
+									(before_kernel - start_time));
 
 	cudaPrintfDisplay(stdout,true);
 	cudaPrintfEnd();
 
 	cudaFree(d_A.els);
 	cudaFree(d_B.els);
+
+	return SUCCESS;
 }
 
 
