@@ -70,18 +70,23 @@ int main(int argc, char *argv[])
 			RET_ERROR("MatMultCublas failed");
 
 	} else {
-		out = &C;
-		C.height = A.height;
-		C.width = B.width;
-		C.stride = C.width;
-		if (! (C.els = (float*) malloc(A.height * B.width * sizeof(C.els[0]))))
-			RET_ERROR("could not allocate space for results matrix");
-
 		if (which == 'G') {
 			printf("Using GPU implementation\n");
-			if (MatMultGPU(A, B, C, alpha) != SUCCESS)
+			out = &B;
+			if (MatMultGPU(A, B, alpha) != SUCCESS)
 				RET_ERROR("MatMultGPU failed");
+
 		} else {
+			out = &C;
+			C.height = A.height;
+			C.width = B.width;
+			C.stride = C.width;
+			//        if (! (C.els = (float*) malloc(A.height * B.width * sizeof(C.els[0]))))
+			//            RET_ERROR("could not allocate space for results matrix");
+			cudaError_t r;
+			r = cudaMallocHost(&C.els, C.width * C.height * sizeof(C.els[0]));
+			if (r != cudaSuccess) RET_ERROR("couldn't allocate host mem for C matrix");
+
 			printf("Using sequential implementation\n");
 			if (MatMultSeq(&A, &B, &C, alpha) != SUCCESS)
 				RET_ERROR("MatMultSeq failed");
