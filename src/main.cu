@@ -81,11 +81,11 @@ int main(int argc, char *argv[])
 			C.height = A.height;
 			C.width = B.width;
 			C.stride = C.width;
-			//        if (! (C.els = (float*) malloc(A.height * B.width * sizeof(C.els[0]))))
-			//            RET_ERROR("could not allocate space for results matrix");
 			cudaError_t r;
 			r = cudaMallocHost(&C.els, C.width * C.height * sizeof(C.els[0]));
-			if (r != cudaSuccess) RET_ERROR("couldn't allocate host mem for C matrix");
+			if (r != cudaSuccess) 
+				if (! (C.els = (float*) malloc(C.width*C.height*sizeof(C.els[0]))))
+					RET_ERROR("couldn't allocate host mem for C matrix");
 
 			printf("Using sequential implementation\n");
 			if (MatMultSeq(&A, &B, &C, alpha) != SUCCESS)
