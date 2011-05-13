@@ -124,15 +124,52 @@ int MatrixToCOOFile(char const* const filename, Matrix const* const m, int trans
 	return SUCCESS;
 }
 
+int GetPadMatrixSize (int N, int alignment) {
+  int rsize = 0;
+
+  for (int i = 1; i < N; i++) {
+    for (int j = 0; j < N; j++) {
+      if (i == j) {
+				while ( (rsize % alignment) != 0) rsize++;
+				break;
+			} 
+      if (j < i) rsize++;
+    }
+  }
+	return rsize;
+}
+
+void TruncAndPadMatrix(Matrix A, int alignment)
+{
+  int rsize = 0;
+  int N = A.width;
+
+  for (int i = 1; i < N; i++) {
+    for (int j = 0; j < N; j++) {
+      if (i == j) {
+				while ( (rsize % alignment) != 0){
+					A.els[rsize] = 0;	
+					rsize++;
+				}
+				break;
+			} 
+      if (j < i) {
+        A.els[rsize] = A.els[i*N+j];
+				rsize++;
+      }
+    }
+  }
+}
+
 void TruncateMatrix(Matrix A)
 {
 
   int k = 0;
   int n = A.width;
 
-  for (int i = 0; i < n; i++) {
+  for (int i = 1; i < n; i++) {
     for (int j = 0; j < n; j++) {
-      if (i == j) continue;
+      if (i == j) break;
       if (j < i) {
         A.els[k] = A.els[i*n+j];
         k++;

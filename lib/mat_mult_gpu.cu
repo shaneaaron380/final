@@ -37,6 +37,7 @@ __global__ void MatMultKernelShared(const Matrix A, Matrix B, const float alpha,
 
   __shared__ float As[SMEM_CACHE_SZ];
 
+	//if (j==0) cuPrintf("0x%lx\n", (long int)A.els);
   //Init cache to zero
   //if (t_idx < SMEM_CACHE_SZ) As[t_idx] = 0;
  
@@ -87,6 +88,7 @@ __global__ void MatMultKernelShared(const Matrix A, Matrix B, const float alpha,
       	if (t_idx == 0) As[t_idx] = A.els[l];
         __syncthreads();
         
+				//S -= __fmul_rn(As[0],B.els[k*N+j]);
 				S -= As[0] * B.els[k*N+j];
 				//S -= As[t_idx & 0xf] * B.els[k*N+j];
      	  
@@ -98,6 +100,73 @@ __global__ void MatMultKernelShared(const Matrix A, Matrix B, const float alpha,
     }
   }
 }
+
+__global__ void MatMultKernelAlignedShared(const Matrix A, Matrix B, const float alpha, const int N)
+{
+  int l = 0, k = 0, i = 1;
+  int j = blockIdx.x * blockDim.x + threadIdx.x;
+	int t_idx = threadIdx.x;
+	float S;
+
+  __shared__ float As[SMEM_CACHE_SZ];
+
+	//if (j==0) cuPrintf("0x%lx\n", (long int)A.els);
+  //Init cache to zero
+  //if (t_idx < SMEM_CACHE_SZ) As[t_idx] = 0;
+ 
+  if (j < N) {
+   	
+		B.els[j] = alpha*B.els[j];
+		
+		for (i = 1; i < N; i++) {
+      
+			S = alpha*B.els[i*N+j]; 
+			k = 0;
+		
+			while (k < i) {	
+      	//__syncthreads();
+				if (t_idx < 16) As[t_idx] = A.els[l+t_idx];
+      	__syncthreads();
+      	
+				S -=  (As[0]  * B.els[k*N+j]) + \
+							(As[1]  * B.els[(k+1)*N+j]) + \
+							(As[2]  * B.els[(k+2)*N+j]) + \
+							(As[3]  * B.els[(k+3)*N+j]) + \
+							(As[4]  * B.els[(k+4)*N+j]) + \
+							(As[5]  * B.els[(k+5)*N+j]) + \
+							(As[6]  * B.els[(k+6)*N+j]) + \
+							(As[7]  * B.els[(k+7)*N+j]) + \
+							(As[8]  * B.els[(k+8)*N+j]) + \
+							(As[9]  * B.els[(k+9)*N+j]) + \
+							(As[10]  * B.els[(k+10)*N+j]) + \
+							(As[11]  * B.els[(k+11)*N+j]) + \
+							(As[12]  * B.els[(k+12)*N+j]) + \
+							(As[13]  * B.els[(k+13)*N+j]) + \
+							(As[14]  * B.els[(k+14)*N+j]) + \
+							(As[15]  * B.els[(k+15)*N+j]);
+      	k+=16;
+     		l+=16;
+			}
+      //__syncthreads();
+      B.els[i*N+j] = S;
+    }
+		//S = alpha*B.els[i*N+j]; 
+		//k=0;
+    //while (k < i)  {
+    //  //__syncthreads();
+    //	if (t_idx == 0) As[t_idx] = A.els[l];
+    //  __syncthreads();
+    //  
+		//	S -= As[0] * B.els[k*N+j];
+    //  
+		//	k++;
+    //  l++;
+    //}
+    ////__syncthreads();
+    //B.els[i*N+j] = S;
+  }
+}
+
 
 void MatMultGPU(const Matrix A, const Matrix B, Matrix C, const float alpha)
 {
@@ -113,13 +182,15 @@ void MatMultGPU(const Matrix A, const Matrix B, Matrix C, const float alpha)
 
 	d_A.width = d_A.stride = A.width;
 	d_A.height = A.height;
-	size_t asize = ((A.width * A.height - A.width)/2) * sizeof(float);
+	//size_t asize = ((A.width * A.height - A.width)/2) * sizeof(float);
+	size_t asize = GetPadMatrixSize(A.width,16) * sizeof(float);
 	cudaMalloc((void**)&d_A.els, asize);
 	cudaMallocReturnStatus = cudaMalloc((void**)&d_A.els, asize);
 	if (cudaMallocReturnStatus == cudaErrorMemoryAllocation) {
 		printf("ERROR: Couldn't allocate Matrix A on GPU, exiting\n"); exit(0);
 	}
-  TruncateMatrix(A);
+  //TruncateMatrix(A);
+  TruncAndPadMatrix(A,16);
 
 	d_B.width = d_B.stride = B.width;
 	d_B.height = B.height;
@@ -157,7 +228,8 @@ void MatMultGPU(const Matrix A, const Matrix B, Matrix C, const float alpha)
 	
 	//MatMultKernel<<<blocksPerGrid, threadsPerBlock>>>(d_A, d_B, alpha, n);
 	//Static shared memory
-	MatMultKernelShared<<<blocksPerGrid, threadsPerBlock>>>(d_A, d_B, alpha, n);
+	//MatMultKernelShared<<<blocksPerGrid, threadsPerBlock>>>(d_A, d_B, alpha, n);
+	MatMultKernelAlignedShared<<<blocksPerGrid, threadsPerBlock>>>(d_A, d_B, alpha, n);
 	//Dynamic shared memory
 	//MatMultKernelShared<<<blocksPerGrid, threadsPerBlock, sizeof(float)*(n-1)>>>(d_A, d_B, d_C, alpha, n);
 	cudaThreadSynchronize();	

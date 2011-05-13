@@ -20,5 +20,7 @@ int MatrixFromCOOFile(char const* const filename, Matrix *m, int trans);
 int MatrixToCOOFile(char const* const filename, Matrix const* const m, int trans);
 
 void TruncateMatrix(Matrix A);
+void TruncAndPadMatrix(Matrix A, int alignment);
+int GetPadMatrixSize(int N, int alignment);
 
 #endif
