@@ -1,7 +1,7 @@
 #! /bin/bash
 
 for i in {1..3}; do
-	for implementation in {seq,gpu,cublas}; do
+	for implementation in {gpu,cublas,seq}; do
 		output="obj/test_input_${i}.txt.${implementation}.out"
 		golden="inputs/test_input_${i}_golden.txt"
 		if [ -f $output ]; then

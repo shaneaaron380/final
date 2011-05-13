@@ -11,14 +11,14 @@ try:
 except ImportError:
 	pass
 
-def n_zeroes(how_many):
+def n_neg_fives(how_many):
 	"""
 	return a generator that yields "how_many" zeroes.  handy for initializing
 	an array to a list of zeroes
 	"""
 	i = 0
 	while i < how_many:
-		yield 0.0
+		yield -5.0
 		i += 1
 
 def sign(a):
@@ -42,14 +42,14 @@ def coo_to_array(filename, height = None, width = None):
 
 	if len(l.split()) == 2:
 		h,w = [ int(i) for i in l.split() ]
-		a = array.array('f', n_zeroes(h * w))
+		a = array.array('f', n_neg_fives(h * w))
 
 	else:
 		if height == None or width == None:
 			raise Exception('height/width not given in file')
 		h,w = int(height), int(width)
 
-		a = array.array('f', n_zeroes(h * w))
+		a = array.array('f', n_neg_fives(h * w))
 		s = l.split()
 		x, y, v = int(s[0]), int(s[1]), float(s[2])
 		a[x * w + y] = v
