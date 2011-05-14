@@ -24,3 +24,8 @@ Or to run our sequentail implementation against input 2:
 	$ make seq2
 
 Note that this will download and create a number of test matrices in the "inputs/" directory, so it will take much longer on the first run.
+
+A number of job scripts are available in the jobscripts directory.  So if you wanted to run one of the above in a jobscript on TACC you could run:
+
+	$ mkdir obj
+	$ qsub jobscripts/job_script.make_gpu2
