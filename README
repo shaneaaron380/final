@@ -1,1 +1,31 @@
-University of Texas CS 380 P final project
+CS380P Parallel Systems
+Final Project: Triangular Matrix Solve in CUDA
+
+Shane Mahon
+slip_hours_used: 35
+
+Aaron Stacy
+slip_hours_used: 29
+
+To run any of the inputs against any of the implemnetations run:
+
+	$ make <implementation><number>
+
+So, for example, to run our CUBLAS implementation against input 2:
+
+	$ make cublas2
+
+Or to run our GPU implementation against input 3:
+
+	$ make gpu3
+
+Or to run our sequentail implementation against input 2:
+
+	$ make seq2
+
+Note that this will download and create a number of test matrices in the "inputs/" directory, so it will take much longer on the first run.
+
+A number of job scripts are available in the jobscripts directory.  So if you wanted to run one of the above in a jobscript on TACC you could run:
+
+	$ mkdir obj
+	$ qsub jobscripts/job_script.make_gpu2
