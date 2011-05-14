@@ -1,0 +1,20 @@
+#!/bin/bash
+#$ -V
+#$ -cwd
+#$ -N run_seq 
+#$ -j y
+#$ -o obj/$JOB_NAME.o$JOB_ID
+#$ -pe 8way 8 #read explanation below
+#$ -q development #queue name - do not change this
+#$ -l h_rt=00:30:00 #specifies resource limits - in this case, the maximum amount of time for which your job can run
+#$ -M astacy #Replace with your email id
+#$ -A A-cs41 #Project Name - Do not change this
+#$ -P data
+echo "Test 1:" > run_seq.log
+bin/final inputs/test_input_1a.txt inputs/test_input_1b.txt 1.0 S obj/test_input_1.txt.seq.out >> run_seq.log 
+echo " " >> run_seq.log
+echo "Test 2:" >> run_seq.log
+bin/final inputs/test_input_2a.txt inputs/test_input_2b.txt 1.0 S obj/test_input_2.txt.seq.out >> run_seq.log 
+echo " " >> run_seq.log
+echo "Test 3:" >> run_seq.log
+bin/final inputs/test_input_3a.txt inputs/test_input_3b.txt 1.0 S obj/test_input_3.txt.seq.out >> run_seq.log 
