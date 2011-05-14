@@ -2,6 +2,7 @@
 
 import sys,os,array
 from math import sqrt
+from math import fabs 
 
 def isnan(num):
 	return num != num
@@ -26,13 +27,16 @@ def sign(a):
 
 def err(a, b):
 	if a != 0:
-		return (a - b) / a
+		return fabs(a - b) / a
 	elif b != 0:
-		return (a - b) / b
+		return fabs(a - b) / b
 	else:
 		return 0
 
 def close_enough(a, b):
+	return err(a, b) < .01
+
+def even_closer(a, b):
 	return err(a, b) < .005
 
 def coo_to_array(filename, height = None, width = None):
@@ -71,6 +75,7 @@ def main():
 	assert(l * l == len(a))
 
 	errors = 0
+	warnings = 0
 
 	for i in xrange(l):
 		for j in xrange(l):
@@ -83,8 +88,15 @@ def main():
 					'ERROR: element (%d, %d) doesn\'t match: %s %s\n' % \
 							(i, j, a[i*l + j], b[i*l + j]))
 				errors += 1
+				continue
+			if not even_closer(a[i*l + j], b[i*l + j]):
+				sys.stderr.write(
+					'WARNING: element (%d, %d) doesn\'t match: %s %s\n' % \
+							(i, j, a[i*l + j], b[i*l + j]))
+				warnings += 1
 
 	print 'Found %d errors' % errors
+	print 'Found %d warnings' % warnings 
 
 	return errors
 
