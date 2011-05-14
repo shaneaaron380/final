@@ -1,6 +1,8 @@
 CS380P Parallel Systems
 Final Project: Triangular Matrix Solve in CUDA
 
+As of May 14, 2011 2pm, this turnin nullifies all previous turnins
+
 Shane Mahon
 slip_hours_used: 0
 
@@ -34,10 +36,15 @@ Build sequential, GPU, and CUBLAS:
 Command line examples (binary name is the same as the name of the root directory where the Makefile and project files reside):
 
 Run GPU:
+
 	$ bin/<binary> inputs/test_input_1a.txt inputs/test_input_1b.txt 1.0 G obj/test_input_1.txt.gpu.out
-Run CUBLAS:	
+
+Run CUBLAS:
+	
     $ bin/<binary> inputs/test_input_1a.txt inputs/test_input_1b.txt 1.0 C obj/test_input_1.txt.gpu.out
+
 Run sequential:
+
 	$ bin/<binary> inputs/test_input_1a.txt inputs/test_input_1b.txt 1.0 S obj/test_input_1.txt.gpu.out
 
 A number of job scripts are available in the jobscripts directory.  So if you wanted to run one of the above in a jobscript on TACC you could run:
