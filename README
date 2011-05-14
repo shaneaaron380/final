@@ -9,6 +9,14 @@ slip_hours_used: 0
 Aaron Stacy
 slip_hours_used: 0
 
+REPORT path:              report/report.pdf
+SRC file paths:           lib/ src/ test/
+INCLUDE file paths:       inc/
+CUDA Profiler settings:   report/final_profiler_settings.cvp
+CUDA Profiler results:    report/final_prof_Session3_Context_0.csv
+JOBSCRIPTS path:          jobscripts/
+BINARY files:             bin/
+
 To run any of the inputs against any of the implemnetations run:
 
 	$ make <implementation><number>
