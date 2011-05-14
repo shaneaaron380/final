@@ -2,10 +2,10 @@ CS380P Parallel Systems
 Final Project: Triangular Matrix Solve in CUDA
 
 Shane Mahon
-slip_hours_used: 35
+slip_hours_used: 0
 
 Aaron Stacy
-slip_hours_used: 29
+slip_hours_used: 0
 
 To run any of the inputs against any of the implemnetations run:
 
@@ -24,6 +24,21 @@ Or to run our sequentail implementation against input 2:
 	$ make seq2
 
 Note that this will download and create a number of test matrices in the "inputs/" directory, so it will take much longer on the first run.
+
+Running manually:
+
+Build sequential, GPU, and CUBLAS:
+
+	$ make
+
+Command line examples (binary name is the same as the name of the root directory where the Makefile and project files reside):
+
+Run GPU:
+	$ bin/<binary> inputs/test_input_1a.txt inputs/test_input_1b.txt 1.0 G obj/test_input_1.txt.gpu.out
+Run CUBLAS:	
+    $ bin/<binary> inputs/test_input_1a.txt inputs/test_input_1b.txt 1.0 C obj/test_input_1.txt.gpu.out
+Run sequential:
+	$ bin/<binary> inputs/test_input_1a.txt inputs/test_input_1b.txt 1.0 S obj/test_input_1.txt.gpu.out
 
 A number of job scripts are available in the jobscripts directory.  So if you wanted to run one of the above in a jobscript on TACC you could run:
 
