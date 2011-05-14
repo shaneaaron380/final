@@ -1,0 +1,16 @@
+# CUDA_PROFILE_LOG_VERSION 2.0
+# CUDA_PROFILE_CSV 1
+# CUDA_DEVICE 0 GeForce 9400
+gpustarttimestamp,method,gputime,cputime,occupancy,gridSizeX,gridSizeY,blockSizeX,blockSizeY,blockSizeZ,dynSmemPerBlock,staSmemPerBlock,registerPerThread,localblocksize,memTransferSize,memtransferhostmemtype,branch,divergent_branch,instructions,warp_serialize,cta_launched,gld_incoherent,gld_coherent,gst_incoherent,gst_coherent,local_load,local_store,tex_cache_hit,tex_cache_miss
+4554749520,memset32_aligned1D,7.456,728.019,0.125,1,1,96,1,1,0,40,2,-1,,0,3,1,30,0,1,0,0,0,2,0,0,0,0
+4555205aa0,memset32_aligned1D,520.832,555.546,1,2731,1,96,1,1,0,40,2,-1,,0,4095,0,45069,0,2731,0,0,0,65536,0,0,0,0
+455529e920,memcpyHtoD,8.384,4.161,,,,,,,,,,0,8,0
+45552a5860,memcpyHtoD,8,3.144,,,,,,,,,,0,4,0
+45552ac2a0,memcpyHtoD,8.352,3.204,,,,,,,,,,0,4,0
+45552b3180,memcpyHtoD,7.968,2.899,,,,,,,,,,0,4,0
+45552d8d00,memcpyHtoD,20.704,45.497,,,,,,,,,,0,22848,1
+45552e3440,memcpyHtoD,25.632,44.073,,,,,,,,,,0,40000,1
+45552fa7c0,_Z26MatMultKernelAlignedShared6MatrixS_fi,2705.18,2735.99,0.167,1,1,128,1,1,0,184,43,-1,,0,3656,1,117456,0,1,0,54118,0,3800,0,0,0,0
+45555b2d20,memcpyDtoH,24.96,43.911,,,,,,,,,,0,40000,1
+45555c0340,memcpyDtoH,10.496,34.085,,,,,,,,,,0,2,0
+45555cb600,memset32_aligned1D,518.976,547.903,1,2731,1,96,1,1,0,40,2,-1,,0,4095,0,45066,0,2731,0,0,0,65536,0,0,0,0
